@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>در حال انتقال به مُدارا…</title>
+    <script>
+      (function () {
+        var base = '/ModernAra1/';
+        var path = window.location.pathname;
+        var relativePath = path.indexOf(base) === 0 ? path.slice(base.length) : path.replace(/^\/+/, '');
+        var route = relativePath.replace(/^\/+|\/+$/g, '');
+        var targetHash = window.location.hash || (route ? '#' + route : '');
+        window.location.replace(base + window.location.search + targetHash);
+      })();
+    </script>
+  </head>
+  <body>
+    <p>در حال انتقال به فروشگاه مُدارا…</p>
+  </body>
+</html>
