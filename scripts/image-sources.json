@@ -141,6 +141,76 @@
       "type": "sunglasses",
       "color": "مشکی",
       "audience": "men"
+    },
+    {
+      "file": "watch/steel-chronograph-watch",
+      "category": "watch",
+      "type": "chronograph",
+      "color": "نقره‌ای",
+      "audience": "men"
+    },
+    {
+      "file": "watch/classic-leather-watch-brown",
+      "category": "watch",
+      "type": "leather",
+      "color": "قهوه‌ای",
+      "audience": "men"
+    },
+    {
+      "file": "watch/rose-gold-women-watch",
+      "category": "watch",
+      "type": "dress",
+      "color": "صورتی",
+      "audience": "women"
+    },
+    {
+      "file": "watch/diver-watch-blue",
+      "category": "watch",
+      "type": "sport",
+      "color": "آبی",
+      "audience": "men"
+    },
+    {
+      "file": "watch/minimal-watch-white-dial",
+      "category": "watch",
+      "type": "minimal",
+      "color": "سفید",
+      "audience": "unisex"
+    },
+    {
+      "file": "bag/leather-tote-bag-tan",
+      "category": "bag",
+      "type": "tote",
+      "color": "بژ",
+      "audience": "women"
+    },
+    {
+      "file": "bag/mens-messenger-bag",
+      "category": "bag",
+      "type": "messenger",
+      "color": "مشکی",
+      "audience": "men"
+    },
+    {
+      "file": "bag/crossbody-bag-black",
+      "category": "bag",
+      "type": "crossbody",
+      "color": "مشکی",
+      "audience": "women"
+    },
+    {
+      "file": "bag/clutch-evening-gold",
+      "category": "bag",
+      "type": "clutch",
+      "color": "طلایی",
+      "audience": "women"
+    },
+    {
+      "file": "bag/leather-backpack-brown",
+      "category": "bag",
+      "type": "backpack",
+      "color": "قهوه‌ای",
+      "audience": "men"
     }
   ],
   "typeKeywords": {
@@ -333,8 +403,6 @@
     }
   },
   "pending": {
-    "watch": 17,
-    "bag": 15,
     "accessory": 15,
     "categoryCards": 6,
     "blog": 3
