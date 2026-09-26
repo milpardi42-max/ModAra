@@ -21,6 +21,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useWishlist } from '../context/WishlistContext';
 import { formatVariant, getProductVariants } from '../lib/variants';
+import { presentationFor } from '../lib/categories';
 import ResponsiveImage from './ResponsiveImage';
 
 type ProductOverlayProps = {
@@ -117,6 +118,7 @@ export default function ProductOverlay({ slug, onClose, onSelectProduct, onOpenA
   }, [onClose]);
 
   const variants = useMemo(() => (product ? getProductVariants(product) : { sizes: [], colors: [] }), [product]);
+  const presentation = product ? presentationFor(product) : null;
   const gallery = useMemo(() => {
     if (!product?.image_url) return [];
     const detail = detailImage(product.image_url);
@@ -248,7 +250,7 @@ export default function ProductOverlay({ slug, onClose, onSelectProduct, onOpenA
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-10">
                 {/* Gallery */}
                 <div>
-                  <div className="relative aspect-square overflow-hidden rounded-2xl border border-dark-100 bg-white shadow-lg">
+                  <div className={`relative overflow-hidden rounded-2xl border border-dark-100 bg-white shadow-lg ${presentation?.ratio ?? 'aspect-square'}`}>
                     <ResponsiveImage
                       key={activeImage}
                       src={gallery[activeImage]}
@@ -570,7 +572,7 @@ export default function ProductOverlay({ slug, onClose, onSelectProduct, onOpenA
                         onClick={() => onSelectProduct(item.slug)}
                         className="group overflow-hidden rounded-2xl border border-dark-100 bg-white text-right shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl"
                       >
-                        <div className="aspect-square overflow-hidden bg-dark-50">
+                        <div className={`overflow-hidden bg-dark-50 ${presentationFor(item).ratio}`}>
                           <ResponsiveImage
                             src={item.image_url}
                             alt={item.name}
