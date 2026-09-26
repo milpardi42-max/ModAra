@@ -211,6 +211,41 @@
       "type": "backpack",
       "color": "قهوه‌ای",
       "audience": "men"
+    },
+    {
+      "file": "accessory/leather-belt-brown-classic",
+      "category": "accessory",
+      "type": "belt",
+      "color": "قهوه‌ای",
+      "audience": "men"
+    },
+    {
+      "file": "accessory/gold-necklace-pendant",
+      "category": "accessory",
+      "type": "necklace",
+      "color": "طلایی",
+      "audience": "women"
+    },
+    {
+      "file": "accessory/silk-scarf-patterned",
+      "category": "accessory",
+      "type": "scarf",
+      "color": "چندرنگ",
+      "audience": "women"
+    },
+    {
+      "file": "accessory/leather-wallet-men",
+      "category": "accessory",
+      "type": "wallet",
+      "color": "قهوه‌ای",
+      "audience": "men"
+    },
+    {
+      "file": "accessory/fedora-hat-beige",
+      "category": "accessory",
+      "type": "hat",
+      "color": "بژ",
+      "audience": "unisex"
     }
   ],
   "typeKeywords": {
@@ -403,8 +438,7 @@
     }
   },
   "pending": {
-    "accessory": 15,
-    "categoryCards": 6,
+    "categoryCards": 1,
     "blog": 3
   }
 }

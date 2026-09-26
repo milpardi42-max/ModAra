@@ -157,8 +157,11 @@ function assign() {
         .map((source) => ({ source, score: scoreProduct(source, product) }))
         .sort((a, b) => b.score - a.score);
 
+      // Walk the whole ranking (not just the top few) so a product happily takes
+      // a free frame from a slightly weaker source instead of dead-ending the
+      // assignment — that keeps every card on its own frame.
       let chosen = null;
-      for (const candidate of ranked.slice(0, 3)) {
+      for (const candidate of ranked) {
         const free = frames.filter((frame) => frame.source === candidate.source && frame.use === 0);
         if (free.length) {
           chosen = free[0];
@@ -166,9 +169,11 @@ function assign() {
         }
       }
       if (!chosen) {
-        // All frames of the best sources are taken: reuse the least-used frame.
-        const bestSlug = ranked[0].source.file;
-        chosen = frames.filter((frame) => frame.source.file === bestSlug).sort((a, b) => a.use - b.use)[0];
+        // Every frame in the category is taken: reuse the least-used frame,
+        // preferring the sources that match this product best.
+        chosen = frames
+          .map((frame) => ({ frame, score: scoreProduct(frame.source, product) }))
+          .sort((a, b) => a.frame.use - b.frame.use || b.score - a.score)[0].frame;
       }
       chosen.use += 1;
       frameUse.set(chosen.path, chosen.use);
