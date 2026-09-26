@@ -13,7 +13,7 @@
  *
  * Usage: node scripts/optimize-images.mjs [--force]
  */
-import { readdir, stat, mkdir } from 'node:fs/promises';
+import { readdir, stat, mkdir, rm } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import sharp from 'sharp';
@@ -101,8 +101,28 @@ for (const file of await walk(IMAGES_DIR)) {
   await Promise.all(jobs);
 }
 
+// Drop renditions whose source image no longer exists, so deleting an unused
+// source photo also removes its stale WebP outputs.
+let pruned = 0;
+async function pruneOrphans(dir) {
+  for (const entry of await readdir(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      await pruneOrphans(full);
+      continue;
+    }
+    const match = entry.name.match(/^(.+)-(640|1280|detail)\.webp$/i);
+    if (!match) continue;
+    const source = path.join(dir, match[1]);
+    if (existsSync(`${source}.jpg`) || existsSync(`${source}.png`)) continue;
+    await rm(full, { force: true });
+    pruned += 1;
+  }
+}
+await pruneOrphans(IMAGES_DIR);
+
 const mb = (bytes) => `${(bytes / 1024 / 1024).toFixed(2)} MB`;
 console.log(
-  `[images] ${sources} sources | ${generated} generated | ${skipped} up-to-date | new output ${mb(bytesAfter)} (sources ${mb(bytesBefore)})`,
+  `[images] ${sources} sources | ${generated} generated | ${skipped} up-to-date | ${pruned} orphaned | new output ${mb(bytesAfter)} (sources ${mb(bytesBefore)})`,
 );
 await mkdir(path.join(ROOT, 'public'), { recursive: true });

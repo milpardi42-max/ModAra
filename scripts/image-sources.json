@@ -9,90 +9,330 @@
     "accessory": "minimal still-life macro on linen and stone"
   },
   "sources": [
-    { "file": "clothing/classic-white-shirt", "category": "clothing", "type": "shirt", "color": "سفید", "audience": "men" },
-    { "file": "clothing/denim-jacket-men", "category": "clothing", "type": "jacket", "color": "آبی", "audience": "men" },
-    { "file": "clothing/oxford-blue-shirt-men", "category": "clothing", "type": "shirt", "color": "آبی", "audience": "men" },
-    { "file": "clothing/polo-shirt-green-men", "category": "clothing", "type": "polo", "color": "سبز", "audience": "men" },
-    { "file": "clothing/basic-tshirt-black-men", "category": "clothing", "type": "tshirt", "color": "مشکی", "audience": "men" },
-    { "file": "clothing/hoodie-charcoal-men", "category": "clothing", "type": "hoodie", "color": "خاکستری", "audience": "men" },
-    { "file": "clothing/knit-sweater-gray-men", "category": "clothing", "type": "sweater", "color": "خاکستری", "audience": "men" },
-    { "file": "clothing/wool-blazer-navy-men", "category": "clothing", "type": "blazer", "color": "سرمه‌ای", "audience": "men" },
-    { "file": "clothing/hoodie-blush-women", "category": "clothing", "type": "hoodie", "color": "صورتی", "audience": "women" }
+    {
+      "file": "clothing/classic-white-shirt",
+      "category": "clothing",
+      "type": "shirt",
+      "color": "سفید",
+      "audience": "men"
+    },
+    {
+      "file": "clothing/denim-jacket-men",
+      "category": "clothing",
+      "type": "jacket",
+      "color": "آبی",
+      "audience": "men"
+    },
+    {
+      "file": "clothing/oxford-blue-shirt-men",
+      "category": "clothing",
+      "type": "shirt",
+      "color": "آبی",
+      "audience": "men"
+    },
+    {
+      "file": "clothing/polo-shirt-green-men",
+      "category": "clothing",
+      "type": "polo",
+      "color": "سبز",
+      "audience": "men"
+    },
+    {
+      "file": "clothing/basic-tshirt-black-men",
+      "category": "clothing",
+      "type": "tshirt",
+      "color": "مشکی",
+      "audience": "men"
+    },
+    {
+      "file": "clothing/hoodie-charcoal-men",
+      "category": "clothing",
+      "type": "hoodie",
+      "color": "خاکستری",
+      "audience": "men"
+    },
+    {
+      "file": "clothing/knit-sweater-gray-men",
+      "category": "clothing",
+      "type": "sweater",
+      "color": "خاکستری",
+      "audience": "men"
+    },
+    {
+      "file": "clothing/wool-blazer-navy-men",
+      "category": "clothing",
+      "type": "blazer",
+      "color": "سرمه‌ای",
+      "audience": "men"
+    },
+    {
+      "file": "clothing/hoodie-blush-women",
+      "category": "clothing",
+      "type": "hoodie",
+      "color": "صورتی",
+      "audience": "women"
+    },
+    {
+      "file": "pants/chino-beige-men",
+      "category": "pants",
+      "type": "chino",
+      "color": "بژ",
+      "audience": "men"
+    },
+    {
+      "file": "pants/slim-jeans-men",
+      "category": "pants",
+      "type": "jeans",
+      "color": "آبی",
+      "audience": "men"
+    },
+    {
+      "file": "pants/corduroy-pants-brown-men",
+      "category": "pants",
+      "type": "corduroy",
+      "color": "قهوه‌ای",
+      "audience": "men"
+    },
+    {
+      "file": "pants/leggings-black-women",
+      "category": "pants",
+      "type": "leggings",
+      "color": "مشکی",
+      "audience": "women"
+    },
+    {
+      "file": "pants/linen-pants-women",
+      "category": "pants",
+      "type": "linen",
+      "color": "بژ",
+      "audience": "women"
+    },
+    {
+      "file": "glasses/aviator-gold-sunglasses",
+      "category": "glasses",
+      "type": "sunglasses",
+      "color": "طلایی",
+      "audience": "men"
+    },
+    {
+      "file": "glasses/cat-eye-sunglasses-black",
+      "category": "glasses",
+      "type": "sunglasses",
+      "color": "مشکی",
+      "audience": "women"
+    },
+    {
+      "file": "glasses/optical-frame-round-clear",
+      "category": "glasses",
+      "type": "optical",
+      "color": "سفید",
+      "audience": "unisex"
+    },
+    {
+      "file": "glasses/oversized-sunglasses-brown",
+      "category": "glasses",
+      "type": "sunglasses",
+      "color": "قهوه‌ای",
+      "audience": "women"
+    },
+    {
+      "file": "glasses/sport-sunglasses-polarized",
+      "category": "glasses",
+      "type": "sunglasses",
+      "color": "مشکی",
+      "audience": "men"
+    }
   ],
   "typeKeywords": {
     "clothing": {
-      "dress": ["میدی", "پیراهن میدی"],
-      "coat": ["ترنچ"],
-      "blazer": ["کت"],
-      "jacket": ["ژاکت جین", "ژاکت"],
-      "cardigan": ["ژاکت بافت", "بافت"],
-      "shirt": ["پیراهن"],
-      "polo": ["پولوشرت"],
-      "tshirt": ["تی‌شرت"],
-      "hoodie": ["هودی"],
-      "sweater": ["پلیور"],
-      "blouse": ["بلوز"]
+      "dress": [
+        "میدی",
+        "پیراهن میدی"
+      ],
+      "coat": [
+        "ترنچ"
+      ],
+      "blazer": [
+        "کت"
+      ],
+      "jacket": [
+        "ژاکت جین",
+        "ژاکت"
+      ],
+      "cardigan": [
+        "ژاکت بافت",
+        "بافت"
+      ],
+      "shirt": [
+        "پیراهن"
+      ],
+      "polo": [
+        "پولوشرت"
+      ],
+      "tshirt": [
+        "تی‌شرت"
+      ],
+      "hoodie": [
+        "هودی"
+      ],
+      "sweater": [
+        "پلیور"
+      ],
+      "blouse": [
+        "بلوز"
+      ]
     },
     "pants": {
-      "cargo": ["کارگو"],
-      "chino": ["چینو"],
-      "jeans": ["جین"],
-      "jogger": ["جاگر"],
-      "leggings": ["لگ"],
-      "linen": ["کتان"],
-      "paperbag": ["پیپربگ"],
-      "trousers": ["شلوار"]
+      "cargo": [
+        "کارگو"
+      ],
+      "chino": [
+        "چینو"
+      ],
+      "jeans": [
+        "جین"
+      ],
+      "jogger": [
+        "جاگر"
+      ],
+      "leggings": [
+        "لگ"
+      ],
+      "linen": [
+        "کتان"
+      ],
+      "paperbag": [
+        "پیپربگ"
+      ],
+      "trousers": [
+        "شلوار"
+      ]
     },
     "glasses": {
-      "sunglasses": ["آفتابی"],
-      "optical": ["طبی"]
+      "sunglasses": [
+        "آفتابی"
+      ],
+      "optical": [
+        "طبی"
+      ]
     },
     "watch": {
-      "chronograph": ["کرنوگراف"],
-      "diver": ["غواصی"],
-      "skeleton": ["اسکلتون"],
-      "digital": ["دیجیتال"],
-      "smart": ["هوشمند"],
-      "minimal": ["مینیمال"],
-      "field": ["فیلد"],
-      "pilot": ["خلبانی"],
-      "moonphase": ["مون‌فاز"],
-      "watch": ["ساعت"]
+      "chronograph": [
+        "کرنوگراف"
+      ],
+      "diver": [
+        "غواصی"
+      ],
+      "skeleton": [
+        "اسکلتون"
+      ],
+      "digital": [
+        "دیجیتال"
+      ],
+      "smart": [
+        "هوشمند"
+      ],
+      "minimal": [
+        "مینیمال"
+      ],
+      "field": [
+        "فیلد"
+      ],
+      "pilot": [
+        "خلبانی"
+      ],
+      "moonphase": [
+        "مون‌فاز"
+      ],
+      "watch": [
+        "ساعت"
+      ]
     },
     "bag": {
-      "tote": ["توت"],
-      "backpack": ["کوله"],
-      "messenger": ["دوشی مردانه"],
-      "crossbody": ["کراس", "دوشی زنانه"],
-      "shoulder": ["دوشی"],
-      "clutch": ["کلاچ"],
-      "briefcase": ["اداری"],
-      "satchel": ["ساچل"],
-      "duffel": ["ساک"],
-      "bucket": ["باکت"],
-      "beltbag": ["کمری"],
-      "quilted": ["لوزی"],
-      "straw": ["حصیری"],
-      "bag": ["کیف"]
+      "tote": [
+        "توت"
+      ],
+      "backpack": [
+        "کوله"
+      ],
+      "messenger": [
+        "دوشی مردانه"
+      ],
+      "crossbody": [
+        "کراس",
+        "دوشی زنانه"
+      ],
+      "shoulder": [
+        "دوشی"
+      ],
+      "clutch": [
+        "کلاچ"
+      ],
+      "briefcase": [
+        "اداری"
+      ],
+      "satchel": [
+        "ساچل"
+      ],
+      "duffel": [
+        "ساک"
+      ],
+      "bucket": [
+        "باکت"
+      ],
+      "beltbag": [
+        "کمری"
+      ],
+      "quilted": [
+        "لوزی"
+      ],
+      "straw": [
+        "حصیری"
+      ],
+      "bag": [
+        "کیف"
+      ]
     },
     "accessory": {
-      "belt": ["کمربند"],
-      "wallet": ["کیف پول"],
-      "cardholder": ["جاکارتی"],
-      "gloves": ["دستکش"],
-      "hat": ["کلاه"],
-      "cap": ["بیسبالی"],
-      "scarf": ["شال"],
-      "necklace": ["گردنبند"],
-      "earrings": ["گوشواره"],
-      "bracelet": ["دستبند"],
-      "ring": ["انگشتر"],
-      "jewelryset": ["ست جواهری"]
+      "belt": [
+        "کمربند"
+      ],
+      "wallet": [
+        "کیف پول"
+      ],
+      "cardholder": [
+        "جاکارتی"
+      ],
+      "gloves": [
+        "دستکش"
+      ],
+      "hat": [
+        "کلاه"
+      ],
+      "cap": [
+        "بیسبالی"
+      ],
+      "scarf": [
+        "شال"
+      ],
+      "necklace": [
+        "گردنبند"
+      ],
+      "earrings": [
+        "گوشواره"
+      ],
+      "bracelet": [
+        "دستبند"
+      ],
+      "ring": [
+        "انگشتر"
+      ],
+      "jewelryset": [
+        "ست جواهری"
+      ]
     }
   },
   "pending": {
-    "pants": 15,
-    "glasses": 15,
     "watch": 17,
     "bag": 15,
     "accessory": 15,

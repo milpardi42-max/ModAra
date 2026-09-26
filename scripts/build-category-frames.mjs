@@ -18,7 +18,7 @@
  *
  * Usage: node scripts/build-category-frames.mjs [--dry-run]
  */
-import { readFile, writeFile, stat } from 'node:fs/promises';
+import { readFile, writeFile, stat, rm } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import sharp from 'sharp';
@@ -198,6 +198,24 @@ if (DRY_RUN) {
 } else {
   let updated = await writeSeed(assignments);
   console.log(`[map] updated ${updated} image_url values in demoSeed.ts`);
+  await pruneUnusedFrames(assignments);
+}
+
+// Derived frames no card points at are removed so the build stays lean; the
+// builder re-derives them on the next run whenever the mapping needs them.
+async function pruneUnusedFrames(assignments) {
+  const used = new Set(assignments.values());
+  let removed = 0;
+  for (const source of manifest.sources) {
+    for (const suffix of ['-frame-b', '-frame-c']) {
+      const target = path.join(IMAGES, `${source.file}${suffix}.jpg`);
+      if (existsSync(target) && !used.has(`/images/${source.file}${suffix}.jpg`)) {
+        await rm(target, { force: true });
+        removed += 1;
+      }
+    }
+  }
+  if (removed) console.log(`[frames] pruned ${removed} unused derived frames`);
 }
 
 async function writeSeed(assignments) {
