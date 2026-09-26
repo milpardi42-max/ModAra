@@ -437,8 +437,5 @@
       ]
     }
   },
-  "pending": {
-    "categoryCards": 1,
-    "blog": 3
-  }
+  "pending": {}
 }
