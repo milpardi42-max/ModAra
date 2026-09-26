@@ -19,7 +19,7 @@ export const supabase = (
           persistSession: true,
           autoRefreshToken: true,
           storage: window.localStorage,
-          storageKey: 'technoshop-auth',
+          storageKey: 'modara-auth',
           detectSessionInUrl: true,
           flowType: 'implicit',
         },
@@ -38,6 +38,8 @@ export type Category = {
   created_at: string;
 };
 
+export type ProductColor = { name: string; hex: string };
+
 export type Product = {
   id: string;
   name: string;
@@ -46,16 +48,22 @@ export type Product = {
   price: number;
   image_url: string | null;
   category_id: string | null;
+  category?: Category | null;
   rating: number;
   stock: number;
   created_at: string;
+  /** Optional variant columns (added in the 20260926 migration). */
+  sizes?: string[] | null;
+  colors?: ProductColor[] | null;
 };
 
 export type CartItem = {
   id: string;
-  user_id: string;
+  user_id: string | null;
   product_id: string;
   quantity: number;
+  /** Selected size/colour, e.g. "قهوه‌ای · L". */
+  variant?: string | null;
   created_at: string;
   product?: Product;
 };
@@ -67,6 +75,8 @@ export type Order = {
   status: string;
   address: string | null;
   phone: string | null;
+  discount?: number | null;
+  coupon_code?: string | null;
   created_at: string;
   tracking_code?: string | null;
   payment_gateway?: string | null;
@@ -80,6 +90,7 @@ export type OrderItem = {
   product_id: string;
   quantity: number;
   price: number;
+  variant?: string | null;
   product?: Product;
 };
 

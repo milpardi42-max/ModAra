@@ -87,7 +87,7 @@ const defaultSettings: StoreSettings = {
   id: 'store',
   store_name: 'مُدارا',
   support_phone: '۰۲۱-۱۲۳۴۵۶۷۸',
-  support_email: 'info@technoshop.ir',
+  support_email: 'info@modara.ir',
   shipping_threshold: 500000,
   currency: 'تومان',
   announcement: 'ارسال رایگان برای سفارش‌های بالای ۵۰۰ هزار تومان',

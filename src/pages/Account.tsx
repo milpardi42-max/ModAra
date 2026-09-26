@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Package, Clock, CheckCircle, Truck, LogOut, Mail, ShieldCheck } from 'lucide-react';
+import { Package, Clock, CheckCircle, Truck, LogIn, LogOut, Mail, ShieldCheck } from 'lucide-react';
 import { isDemoMode, supabase, type Order, type OrderItem } from '../lib/supabase';
 import Breadcrumbs from '../components/Breadcrumbs';
 import { useAuth } from '../context/AuthContext';
-import { formatPrice, formatDateTime, asset } from '../lib/format';
+import { formatPrice, formatDateTime } from '../lib/format';
+import ResponsiveImage from '../components/ResponsiveImage';
 
 type AccountProps = {
   onNavigate: (view: string, param?: string) => void;
+  onOpenAuth: () => void;
 };
 
 const statusConfig: Record<string, { label: string; icon: React.ComponentType<{ className?: string }>; color: string }> = {
@@ -16,7 +18,7 @@ const statusConfig: Record<string, { label: string; icon: React.ComponentType<{ 
   delivered: { label: 'تحویل داده شده', icon: CheckCircle, color: 'text-success-600 bg-success-50' },
 };
 
-export default function Account({ onNavigate }: AccountProps) {
+export default function Account({ onNavigate, onOpenAuth }: AccountProps) {
   const { user, signOut } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,8 +42,17 @@ export default function Account({ onNavigate }: AccountProps) {
     return (
       <div className="pt-20 min-h-screen flex items-center justify-center" dir="rtl">
         <div className="text-center">
-          <p className="text-xl font-medium text-dark-700 mb-4">لطفاً وارد شوید</p>
-          <button onClick={() => onNavigate('home')} className="btn-primary">بازگشت به خانه</button>
+          <p className="text-xl font-medium text-dark-700 mb-2">برای دیدن سفارش‌ها وارد شوید</p>
+          <p className="mb-6 text-sm text-dark-400">سابقهٔ خرید، فاکتورها و پیگیری سفارش‌ها در حساب کاربری شماست.</p>
+          <div className="flex flex-wrap justify-center gap-3">
+            <button onClick={onOpenAuth} className="btn-primary">
+              <LogIn className="h-4 w-4" />
+              ورود / ثبت‌نام
+            </button>
+            <button onClick={() => onNavigate('home')} className="btn-ghost">
+              بازگشت به خانه
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -129,9 +140,10 @@ export default function Account({ onNavigate }: AccountProps) {
                     {order.order_items?.map((item: OrderItem) => (
                       <div key={item.id} className="flex items-center gap-3 rounded-xl bg-dark-50 p-3">
                         <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-white">
-                          <img
-                            src={asset(item.product?.image_url)}
+                          <ResponsiveImage
+                            src={item.product?.image_url}
                             alt={item.product?.name || ''}
+                            sizes="56px"
                             className="h-full w-full object-cover"
                           />
                         </div>

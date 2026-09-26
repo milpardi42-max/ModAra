@@ -9,7 +9,10 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
-    "seed": "node scripts/generate-seed.mjs"
+    "seed": "node scripts/generate-seed.mjs",
+    "images": "node scripts/optimize-images.mjs",
+    "og": "node scripts/generate-og.mjs",
+    "test": "npm run typecheck && npm run lint && node scripts/smoke-test.mjs && node scripts/logic-test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
@@ -28,7 +31,9 @@
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
     "eslint-plugin-react-refresh": "^0.4.11",
     "globals": "^15.9.0",
+    "jsdom": "^30.1.1",
     "postcss": "^8.4.35",
+    "sharp": "^0.35.4",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.3.0",

@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { Calendar, User, ArrowLeft } from 'lucide-react';
 import { supabase, type BlogPost } from '../lib/supabase';
 import Breadcrumbs from '../components/Breadcrumbs';
-import { formatDate, asset } from '../lib/format';
+import { formatDate } from '../lib/format';
+import ResponsiveImage from '../components/ResponsiveImage';
 
 type BlogProps = {
   onNavigate: (view: string, param?: string) => void;
@@ -60,9 +61,11 @@ export default function Blog({ onNavigate }: BlogProps) {
               >
                 <div className="grid grid-cols-1 md:grid-cols-2">
                   <div className="aspect-video md:aspect-auto md:h-80 overflow-hidden bg-dark-50">
-                    <img
-                      src={asset(featured.image_url)}
+                    <ResponsiveImage
+                      src={featured.image_url}
                       alt={featured.title}
+                      eager
+                      sizes="(max-width: 768px) 100vw, 60vw"
                       className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   </div>
@@ -94,9 +97,10 @@ export default function Blog({ onNavigate }: BlogProps) {
                   style={{ animationDelay: `${i * 100}ms` }}
                 >
                   <div className="aspect-video overflow-hidden bg-dark-50">
-                    <img
-                      src={asset(post.image_url)}
+                    <ResponsiveImage
+                      src={post.image_url}
                       alt={post.title}
+                      sizes="(max-width: 768px) 100vw, 30vw"
                       className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                   </div>

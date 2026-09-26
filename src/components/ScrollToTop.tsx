@@ -17,7 +17,7 @@ export default function ScrollToTop() {
   return (
     <button
       onClick={scrollToTop}
-      className={`fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-4 z-50 flex h-11 w-11 items-center justify-center rounded-full bg-dark-900 text-white shadow-xl transition-all duration-300 hover:bg-dark-800 hover:scale-110 sm:bottom-6 sm:right-6 sm:h-12 sm:w-12 ${
+      className={`fixed bottom-[calc(max(1rem,env(safe-area-inset-bottom))+4.75rem)] right-4 z-50 flex h-11 w-11 items-center justify-center rounded-full bg-dark-900 text-white shadow-xl transition-all duration-300 hover:bg-dark-800 hover:scale-110 sm:bottom-24 sm:right-6 sm:h-12 sm:w-12 ${
         visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
       }`}
       aria-label="اسکرول به بالا"

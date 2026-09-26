@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { Calendar, User, ArrowLeft } from 'lucide-react';
 import { supabase, type BlogPost } from '../lib/supabase';
 import Breadcrumbs from '../components/Breadcrumbs';
-import { formatDate, asset } from '../lib/format';
+import { formatDate } from '../lib/format';
+import ResponsiveImage from '../components/ResponsiveImage';
 
 type BlogPostPageProps = {
   slug: string;
@@ -78,9 +79,11 @@ export default function BlogPostPage({ slug, onNavigate }: BlogPostPageProps) {
 
           {/* Cover image */}
           <div className="aspect-video overflow-hidden rounded-2xl mb-8 bg-dark-100">
-            <img
-              src={asset(post.image_url)}
+            <ResponsiveImage
+              src={post.image_url}
               alt={post.title}
+              eager
+              sizes="(max-width: 768px) 100vw, 720px"
               className="h-full w-full object-cover"
             />
           </div>

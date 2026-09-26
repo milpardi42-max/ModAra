@@ -1,7 +1,7 @@
 import { X, Plus, Minus, Trash2, ShoppingBag } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext';
-import { formatPrice, asset } from '../lib/format';
+import { formatPrice } from '../lib/format';
+import ResponsiveImage from './ResponsiveImage';
 
 type CartDrawerProps = {
   open: boolean;
@@ -11,13 +11,12 @@ type CartDrawerProps = {
 
 export default function CartDrawer({ open, onClose, onCheckout }: CartDrawerProps) {
   const { items, loading, updateQuantity, removeFromCart, totalItems, totalPrice } = useCart();
-  const { user } = useAuth();
 
   return (
     <>
       {/* Overlay */}
       <div
-        className={`fixed inset-0 z-50 bg-dark-950/50 backdrop-blur-sm transition-opacity duration-300 ${
+        className={`fixed inset-0 z-[80] bg-dark-950/50 backdrop-blur-sm transition-opacity duration-300 ${
           open ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
         onClick={onClose}
@@ -25,7 +24,7 @@ export default function CartDrawer({ open, onClose, onCheckout }: CartDrawerProp
 
       {/* Drawer */}
       <div
-        className={`fixed top-0 left-0 z-50 h-full w-full max-w-md bg-white shadow-2xl transition-transform duration-300 ${
+        className={`fixed top-0 left-0 z-[80] h-full w-full max-w-md bg-white shadow-2xl transition-transform duration-300 ${
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
         dir="rtl"
@@ -64,20 +63,13 @@ export default function CartDrawer({ open, onClose, onCheckout }: CartDrawerProp
                   </div>
                 ))}
               </div>
-            ) : !user ? (
-              <div className="flex flex-col items-center justify-center h-full text-center">
-                <ShoppingBag className="h-16 w-16 text-dark-300 mb-4" />
-                <p className="text-lg font-medium text-dark-700 mb-2">سبد خرید شما خالی است</p>
-                <p className="text-sm text-dark-400 mb-6">برای افزودن محصول به سبد، ابتدا وارد شوید</p>
-                <button onClick={onClose} className="btn-primary">
-                  ادامه خرید
-                </button>
-              </div>
             ) : items.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center">
                 <ShoppingBag className="h-16 w-16 text-dark-300 mb-4" />
                 <p className="text-lg font-medium text-dark-700 mb-2">سبد خرید شما خالی است</p>
-                <p className="text-sm text-dark-400 mb-6">محصولات مورد علاقه را به سبد اضافه کنید</p>
+                <p className="text-sm text-dark-400 mb-6">
+                  بدون نیاز به ورود، محصولات را به سبد اضافه کنید — ورود فقط در زمان ثبت سفارش لازم است.
+                </p>
                 <button onClick={onClose} className="btn-primary">
                   شروع خرید
                 </button>
@@ -90,9 +82,10 @@ export default function CartDrawer({ open, onClose, onCheckout }: CartDrawerProp
                     className="flex gap-3 rounded-xl border border-dark-100 p-3 animate-fade-in"
                   >
                     <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-dark-50">
-                      <img
-                        src={asset(item.product?.image_url)}
+                      <ResponsiveImage
+                        src={item.product?.image_url}
                         alt={item.product?.name || ''}
+                        sizes="80px"
                         className="h-full w-full object-cover"
                       />
                     </div>
@@ -100,6 +93,7 @@ export default function CartDrawer({ open, onClose, onCheckout }: CartDrawerProp
                       <div>
                         <h3 className="text-sm font-medium text-dark-900 line-clamp-1">
                           {item.product?.name}
+                          {item.variant && <span className="font-normal text-dark-400"> · {item.variant}</span>}
                         </h3>
                         <p className="text-sm font-bold text-amber-700">
                           {formatPrice(item.product?.price ?? 0)}

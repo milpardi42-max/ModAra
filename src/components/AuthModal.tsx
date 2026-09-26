@@ -45,7 +45,7 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[85] flex items-center justify-center p-4">
       {/* Overlay */}
       <div
         className="absolute inset-0 bg-dark-950/60 backdrop-blur-sm animate-fade-in"
@@ -69,7 +69,7 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
             <p className="mt-1 text-sm text-white/70">
               {mode === 'signin'
                 ? 'خوش آمدید! لطفاً وارد شوید'
-                : 'برای خرید از تکنو‌شاپ ثبت‌نام کنید'}
+                : 'برای خرید از مُدارا ثبت‌نام کنید'}
             </p>
           </div>
 

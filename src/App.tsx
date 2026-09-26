@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
+import { WishlistProvider } from './context/WishlistContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import CartDrawer from './components/CartDrawer';
@@ -9,10 +10,14 @@ import CheckoutModal from './components/CheckoutModal';
 import ChatWidget from './components/ChatWidget';
 import ScrollToTop from './components/ScrollToTop';
 import BackgroundDecor from './components/BackgroundDecor';
-import FloatingSearch from './components/FloatingSearch';
+import UtilityBar from './components/UtilityBar';
+import SearchOverlay from './components/SearchOverlay';
+import WishlistPanel from './components/WishlistPanel';
+import ProductOverlay from './components/ProductOverlay';
+import ChapterDots from './components/ChapterDots';
+import NotFound from './components/NotFound';
 import Home from './pages/Home';
 import Shop from './pages/Shop';
-import ProductDetail from './pages/ProductDetail';
 import Blog from './pages/Blog';
 import BlogPostPage from './pages/BlogPostPage';
 import Account from './pages/Account';
@@ -20,18 +25,19 @@ import AdminPanel from './pages/AdminPanel';
 import AdminLogin from './pages/AdminLogin';
 import PaymentCallback from './pages/PaymentCallback';
 import Invoice from './pages/Invoice';
+import { supabase } from './lib/supabase';
 
 type View =
   | { name: 'home' }
   | { name: 'shop'; category?: string }
-  | { name: 'product'; slug: string }
   | { name: 'blog' }
   | { name: 'blog-post'; slug: string }
   | { name: 'account' }
   | { name: 'admin' }
   | { name: 'admin-login' }
   | { name: 'payment-callback' }
-  | { name: 'invoice'; orderId: string };
+  | { name: 'invoice'; orderId: string }
+  | { name: 'not-found' };
 
 function safeDecode(value: string): string {
   try {
@@ -41,11 +47,7 @@ function safeDecode(value: string): string {
   }
 }
 
-/**
- * GitHub Pages serves this app from a static sub-path. Hash routes keep
- * navigation shareable without asking the server for a non-existent file.
- * The 404 fallback also converts path routes into these hashes.
- */
+/** Parses the hash route. `product` routes are handled as an overlay, not a view. */
 function viewFromHash(hash: string): View | null {
   const route = hash.replace(/^#/, '').replace(/^\/+|\/+$/g, '');
   if (!route || route === 'home') return { name: 'home' };
@@ -58,130 +60,317 @@ function viewFromHash(hash: string): View | null {
   if (name === 'backoffice-login') return { name: 'admin-login' };
   if (name === 'invoice' && param) return { name: 'invoice', orderId: param };
   if (name === 'shop' || name === 'products') return { name: 'shop', category: param || undefined };
-  if (name === 'product' && param) return { name: 'product', slug: param };
   if (name === 'blog-post' && param) return { name: 'blog-post', slug: param };
   if (name === 'blog') return param ? { name: 'blog-post', slug: param } : { name: 'blog' };
   if (name === 'account') return { name: 'account' };
+  // In-page chapter anchors (#chapter-story ...) keep the shopper on the home page.
+  if (name.startsWith('chapter')) return { name: 'home' };
 
   return null;
 }
 
-function initialView(): View {
-  if (new URLSearchParams(window.location.search).get('payment') === 'zarinpal') return { name: 'payment-callback' };
-  return viewFromHash(window.location.hash) ?? { name: 'home' };
-}
+const TITLES: Record<View['name'], string> = {
+  home: 'مُدارا | فروشگاه آنلاین مد و فشن',
+  shop: 'کاتالوگ محصولات | مُدارا',
+  blog: 'مجله مد و استایل | مُدارا',
+  'blog-post': 'مقاله | مُدارا',
+  account: 'حساب کاربری | مُدارا',
+  admin: 'پنل مدیریت | مُدارا',
+  'admin-login': 'ورود مدیریت | مُدارا',
+  'payment-callback': 'نتیجه پرداخت | مُدارا',
+  invoice: 'فاکتور سفارش | مُدارا',
+  'not-found': 'صفحه پیدا نشد | مُدارا',
+};
+
+const DESCRIPTIONS: Partial<Record<View['name'], string>> = {
+  home: 'فروشگاه آنلاین مُدارا - جدیدترین لباس‌ها، اکسسوری‌ها، عینک و ساعت‌های لوکس با بهترین قیمت',
+  shop: 'کاتالوگ کامل محصولات مُدارا با فیلتر دسته‌بندی، قیمت و امتیاز',
+  blog: 'راهنمای مد و استایل، مقاله‌های تخصصی مُدارا',
+};
 
 function AppContent() {
-  const [view, setView] = useState<View>(initialView);
+  const [view, setView] = useState<View>(() => {
+    if (new URLSearchParams(window.location.search).get('payment') === 'zarinpal') return { name: 'payment-callback' };
+    return viewFromHash(window.location.hash) ?? { name: 'not-found' };
+  });
+  const [overlaySlug, setOverlaySlug] = useState<string | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [wishlistOpen, setWishlistOpen] = useState(false);
 
-  const handleNavigate = (name: string, param?: string) => {
-    let nextView: View;
-    let routeHash = '';
+  /** Scroll position to restore when a product overlay closes. */
+  const savedScrollRef = useRef(0);
+  /** Whether the current overlay entry was pushed (so Back closes it). */
+  const overlayPushedRef = useRef(false);
 
-    if (name === 'home') {
-      nextView = { name: 'home' };
-    } else if (name === 'shop') {
-      nextView = { name: 'shop', category: param };
-      routeHash = param ? `#shop/${encodeURIComponent(param)}` : '#shop';
-    } else if (name === 'product') {
-      nextView = { name: 'product', slug: param || '' };
-      routeHash = `#product/${encodeURIComponent(param || '')}`;
-    } else if (name === 'blog') {
-      nextView = { name: 'blog' };
-      routeHash = '#blog';
-    } else if (name === 'blog-post') {
-      nextView = { name: 'blog-post', slug: param || '' };
-      routeHash = `#blog-post/${encodeURIComponent(param || '')}`;
-    } else if (name === 'account') {
-      nextView = { name: 'account' };
-      routeHash = '#account';
-    } else if (name === 'admin') {
-      nextView = { name: 'admin' };
-      routeHash = '#admin';
-    } else if (name === 'admin-login') {
-      nextView = { name: 'admin-login' };
-      routeHash = '#backoffice-login';
-    } else if (name === 'invoice') {
-      nextView = { name: 'invoice', orderId: param || '' };
-      routeHash = `#invoice/${encodeURIComponent(param || '')}`;
-    } else {
-      return;
-    }
-
-    window.history.replaceState(null, '', `${window.location.pathname}${routeHash}`);
-    setView(nextView);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  useEffect(() => {
-    const handleHashChange = () => setView(viewFromHash(window.location.hash) ?? { name: 'home' });
-    const handleOpenCart = () => setCartOpen(true);
-    window.addEventListener('hashchange', handleHashChange);
-    window.addEventListener('modara:open-cart', handleOpenCart);
-    return () => {
-      window.removeEventListener('hashchange', handleHashChange);
-      window.removeEventListener('modara:open-cart', handleOpenCart);
-    };
+  const isProductHash = useCallback((hash: string) => {
+    const route = hash.replace(/^#/, '');
+    return route.startsWith('product/');
   }, []);
 
-  useEffect(() => {
-    window.scrollTo({ top: 0 });
+  const applyHash = useCallback(
+    (hash: string) => {
+      if (isProductHash(hash)) {
+        const slug = safeDecode(hash.replace(/^#product\/?/, ''));
+        setOverlaySlug(slug || null);
+        return;
+      }
+      setOverlaySlug(null);
+      const next = viewFromHash(hash) ?? { name: 'not-found' as const };
+      setView(next);
+    },
+    [isProductHash],
+  );
+
+  /* ------------------------------------------------ navigation & routing */
+
+  const handleNavigate = useCallback(
+    (name: string, param?: string) => {
+      let nextView: View;
+      let routeHash = '';
+
+      if (name === 'home') nextView = { name: 'home' };
+      else if (name === 'shop') {
+        nextView = { name: 'shop', category: param };
+        routeHash = param ? `#shop/${encodeURIComponent(param)}` : '#shop';
+      } else if (name === 'blog') {
+        nextView = { name: 'blog' };
+        routeHash = '#blog';
+      } else if (name === 'blog-post') {
+        nextView = { name: 'blog-post', slug: param || '' };
+        routeHash = `#blog-post/${encodeURIComponent(param || '')}`;
+      } else if (name === 'account') {
+        nextView = { name: 'account' };
+        routeHash = '#account';
+      } else if (name === 'admin') {
+        nextView = { name: 'admin' };
+        routeHash = '#admin';
+      } else if (name === 'admin-login') {
+        nextView = { name: 'admin-login' };
+        routeHash = '#backoffice-login';
+      } else if (name === 'invoice') {
+        nextView = { name: 'invoice', orderId: param || '' };
+        routeHash = `#invoice/${encodeURIComponent(param || '')}`;
+      } else return;
+
+      setView(nextView);
+      setOverlaySlug(null);
+      setSearchOpen(false);
+      setWishlistOpen(false);
+      window.history.pushState(null, '', `${window.location.pathname}${routeHash}`);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    [],
+  );
+
+  /** Opens the product overlay without losing the current scroll position. */
+  const openProduct = useCallback((slug: string) => {
+    savedScrollRef.current = window.scrollY;
+    setSearchOpen(false);
+    setWishlistOpen(false);
+    setOverlaySlug(slug);
+    const routeHash = `#product/${encodeURIComponent(slug)}`;
+    if (window.location.hash !== routeHash) {
+      window.history.pushState(null, '', `${window.location.pathname}${routeHash}`);
+      overlayPushedRef.current = true;
+    } else {
+      overlayPushedRef.current = false;
+    }
+  }, []);
+
+  /** Closes the overlay and returns the shopper to where they were. */
+  const closeProduct = useCallback(() => {
+    const restoreScroll = () => {
+      window.requestAnimationFrame(() => window.scrollTo({ top: savedScrollRef.current }));
+    };
+    if (overlayPushedRef.current) {
+      overlayPushedRef.current = false;
+      // popstate → applyHash runs with the previous hash and closes the overlay.
+      window.history.back();
+      window.setTimeout(restoreScroll, 60);
+      return;
+    }
+    const baseHash = view.name === 'home' ? '' : currentBaseHash(view);
+    window.history.replaceState(null, '', `${window.location.pathname}${baseHash}`);
+    setOverlaySlug(null);
+    restoreScroll();
   }, [view]);
 
-  const isHome = view.name === 'home';
+  useEffect(() => {
+    const onHashChange = () => applyHash(window.location.hash);
+    const onPopState = () => applyHash(window.location.hash);
+    const onOpenCart = () => setCartOpen(true);
+    window.addEventListener('hashchange', onHashChange);
+    window.addEventListener('popstate', onPopState);
+    window.addEventListener('modara:open-cart', onOpenCart);
+    return () => {
+      window.removeEventListener('hashchange', onHashChange);
+      window.removeEventListener('popstate', onPopState);
+      window.removeEventListener('modara:open-cart', onOpenCart);
+    };
+  }, [applyHash]);
+
+  // Deep link straight into a product: /#product/<slug>
+  useEffect(() => {
+    if (isProductHash(window.location.hash) && !overlaySlug) {
+      const slug = safeDecode(window.location.hash.replace(/^#product\/?/, ''));
+      if (slug) setOverlaySlug(slug);
+    }
+  }, [isProductHash, overlaySlug]);
+
+  // Lock page scroll while the product overlay owns the viewport.
+  useEffect(() => {
+    if (!overlaySlug) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [overlaySlug]);
+
+  /* ------------------------------------------------------------- metadata */
+
+  useEffect(() => {
+    let cancelled = false;
+    const baseTitle = TITLES[view.name];
+    if (!overlaySlug) {
+      document.title = baseTitle;
+    } else {
+      document.title = 'مشاهده سریع محصول | مُدارا';
+      void supabase
+        .from('products')
+        .select('name')
+        .eq('slug', overlaySlug)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (!cancelled && data?.name) document.title = `${data.name} | مُدارا`;
+        });
+    }
+    const description = DESCRIPTIONS[view.name];
+    if (description) {
+      document.querySelector('meta[name="description"]')?.setAttribute('content', description);
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [view, overlaySlug]);
+
+  /* ------------------------------------------------------------------ view */
+
   const isPaymentCallback = view.name === 'payment-callback';
   const isAdminLogin = view.name === 'admin-login';
   const isInvoice = view.name === 'invoice';
   const isUtilityPage = isPaymentCallback || isAdminLogin || isInvoice;
+  const isAdmin = view.name === 'admin';
+  const showStorefrontChrome = !isUtilityPage && !isAdmin;
+
+  const quickView = useCallback((slug: string) => openProduct(slug), [openProduct]);
 
   return (
-    <div className="relative min-h-screen flex flex-col">
+    <div className="relative flex min-h-screen flex-col">
       {!isPaymentCallback && <BackgroundDecor />}
-      {!isUtilityPage && <Header onNavigate={handleNavigate} />}
+      {!isUtilityPage && !isAdmin && <Header onNavigate={handleNavigate} />}
 
       <main className="flex-1">
-        {view.name === 'home' && <Home onNavigate={handleNavigate} />}
-        {view.name === 'shop' && <Shop onNavigate={handleNavigate} initialCategory={view.category} />}
-        {view.name === 'product' && (
-          <ProductDetail slug={view.slug} onNavigate={handleNavigate} onOpenAuth={() => setAuthOpen(true)} />
-        )}
+        {view.name === 'home' && <Home onNavigate={handleNavigate} onQuickView={quickView} focusCatalog={false} catalogCategory={null} />}
+        {view.name === 'shop' && <Shop onQuickView={quickView} initialCategory={view.category} />}
         {view.name === 'blog' && <Blog onNavigate={handleNavigate} />}
         {view.name === 'blog-post' && <BlogPostPage slug={view.slug} onNavigate={handleNavigate} />}
-        {view.name === 'account' && <Account onNavigate={handleNavigate} />}
+        {view.name === 'account' && <Account onNavigate={handleNavigate} onOpenAuth={() => setAuthOpen(true)} />}
         {view.name === 'admin-login' && <AdminLogin onNavigate={handleNavigate} />}
         {view.name === 'admin' && <AdminPanel onNavigate={handleNavigate} onOpenAuth={() => handleNavigate('admin-login')} />}
         {view.name === 'payment-callback' && <PaymentCallback onNavigate={handleNavigate} />}
         {view.name === 'invoice' && <Invoice orderId={view.orderId} onNavigate={handleNavigate} />}
+        {view.name === 'not-found' && <NotFound onNavigate={handleNavigate} />}
       </main>
 
-      {!isUtilityPage && <Footer onNavigate={handleNavigate} />}
+      {!isUtilityPage && !isAdmin && <Footer onNavigate={handleNavigate} />}
 
-      {!isUtilityPage && <CartDrawer
-        open={cartOpen}
-        onClose={() => setCartOpen(false)}
-        onCheckout={() => {
-          setCartOpen(false);
-          setCheckoutOpen(true);
-        }}
-      />}
+      {showStorefrontChrome && (
+        <>
+          <UtilityBar onOpenSearch={() => setSearchOpen(true)} onOpenWishlist={() => setWishlistOpen(true)} />
+          {view.name === 'home' && <ChapterDots />}
+        </>
+      )}
 
-      {!isUtilityPage && <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />}
-      {!isUtilityPage && <CheckoutModal open={checkoutOpen} onClose={() => setCheckoutOpen(false)} onOpenInvoice={(id) => handleNavigate('invoice', id)} />}
-      {!isUtilityPage && <ChatWidget />}
-      {!isUtilityPage && <ScrollToTop />}
-      {isHome && <FloatingSearch onNavigate={handleNavigate} />}
+      {!isUtilityPage && !isAdmin && (
+        <CartDrawer
+          open={cartOpen}
+          onClose={() => setCartOpen(false)}
+          onCheckout={() => {
+            setCartOpen(false);
+            setCheckoutOpen(true);
+          }}
+        />
+      )}
+
+      {!isUtilityPage && !isAdmin && <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />}
+      {!isUtilityPage && !isAdmin && (
+        <CheckoutModal
+          open={checkoutOpen}
+          onClose={() => setCheckoutOpen(false)}
+          onOpenInvoice={(id) => handleNavigate('invoice', id)}
+          onOpenAuth={() => {
+            setCheckoutOpen(false);
+            setAuthOpen(true);
+          }}
+        />
+      )}
+
+      {!isUtilityPage && !isAdmin && (
+        <>
+          <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} onSelectProduct={quickView} />
+          <WishlistPanel open={wishlistOpen} onClose={() => setWishlistOpen(false)} onSelectProduct={quickView} />
+        </>
+      )}
+
+      {overlaySlug && (
+        <ProductOverlay
+          key={overlaySlug}
+          slug={overlaySlug}
+          onClose={closeProduct}
+          onSelectProduct={quickView}
+          onOpenAuth={() => setAuthOpen(true)}
+        />
+      )}
+
+      {!isUtilityPage && !isAdmin && <ChatWidget />}
+      {!isUtilityPage && !isAdmin && <ScrollToTop />}
     </div>
   );
+}
+
+/** Rebuilds the base hash for the current view (used when closing overlays). */
+function currentBaseHash(view: View): string {
+  switch (view.name) {
+    case 'shop':
+      return view.category ? `#shop/${encodeURIComponent(view.category)}` : '#shop';
+    case 'blog':
+      return '#blog';
+    case 'blog-post':
+      return `#blog-post/${encodeURIComponent(view.slug)}`;
+    case 'account':
+      return '#account';
+    case 'admin':
+      return '#admin';
+    case 'admin-login':
+      return '#backoffice-login';
+    case 'invoice':
+      return `#invoice/${encodeURIComponent(view.orderId)}`;
+    default:
+      return '';
+  }
 }
 
 export default function App() {
   return (
     <AuthProvider>
       <CartProvider>
-        <AppContent />
+        <WishlistProvider>
+          <AppContent />
+        </WishlistProvider>
       </CartProvider>
     </AuthProvider>
   );

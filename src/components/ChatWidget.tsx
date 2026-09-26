@@ -49,7 +49,7 @@ export default function ChatWidget() {
       {/* Chat button */}
       <button
         onClick={() => setOpen(!open)}
-        className={`fixed bottom-[max(1rem,env(safe-area-inset-bottom))] left-4 z-50 flex h-12 w-12 items-center justify-center rounded-full shadow-xl transition-all hover:scale-110 sm:bottom-6 sm:left-6 sm:h-14 sm:w-14 ${
+        className={`fixed bottom-[calc(max(1rem,env(safe-area-inset-bottom))+4.75rem)] left-4 z-50 flex h-12 w-12 items-center justify-center rounded-full shadow-xl transition-all hover:scale-110 sm:bottom-24 sm:left-6 sm:h-14 sm:w-14 ${
           open ? 'bg-dark-900 text-white rotate-90' : 'bg-gradient-to-br from-amber-500 to-orange-600 text-white'
         }`}
         aria-label="چت پشتیبانی"
@@ -65,7 +65,7 @@ export default function ChatWidget() {
 
       {/* Chat panel */}
       <div
-        className={`fixed bottom-[calc(max(1rem,env(safe-area-inset-bottom))+4.5rem)] left-4 z-50 w-[calc(100vw-2rem)] max-w-sm origin-bottom-left transition-all duration-300 sm:bottom-24 sm:left-6 sm:w-[calc(100vw-3rem)] ${
+        className={`fixed bottom-[calc(max(1rem,env(safe-area-inset-bottom))+8.5rem)] left-4 z-50 w-[calc(100vw-2rem)] max-w-sm origin-bottom-left transition-all duration-300 sm:bottom-40 sm:left-6 sm:w-[calc(100vw-3rem)] ${
           open ? 'scale-100 opacity-100' : 'scale-0 opacity-0 pointer-events-none'
         }`}
         dir="rtl"

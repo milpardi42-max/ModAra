@@ -1,6 +1,8 @@
 # مُدارا | ModAra
 
-فروشگاه آنلاین مد و فشن (React + TypeScript + Vite + Tailwind).
+فروشگاه آنلاین مد و فشن (React + TypeScript + Vite + Tailwind) با تجربهٔ خرید **تک‌صفحه‌ای و داستانی**:
+بدون منوی ثابت؛ کشف محصول از طریق اسکرول فصل‌ها انجام می‌شود و همهٔ ابزارها (جستجو، علاقه‌مندی، سبد)
+در یک نوار شناور در دسترس‌اند.
 
 ## اجرای سریع (بدون هیچ تنظیماتی)
 
@@ -16,15 +18,15 @@ npm run dev
 
 اگر متغیرهای محیطی Supabase تنظیم نشده باشند، برنامه به‌صورت خودکار از یک بک‌اند محلی داخل مرورگر
 استفاده می‌کند (`src/lib/localBackend.ts`) که داده‌های اولیه‌اش از فایل‌های
-`supabase/migrations/*.sql` استخراج شده است (`src/lib/demoSeed.ts`).
+`supabase/migrations/*.sql` استخراج شده اند (`src/lib/demoSeed.ts`).
 
 در این حالت همه‌ی بخش‌ها کار می‌کنند:
 
-- صفحه اصلی، فروشگاه، فیلتر دسته‌بندی، مرتب‌سازی و جست‌وجو
-- صفحه محصول، محصولات مرتبط و ثبت نظر
-- ثبت‌نام / ورود (کاربر به‌صورت محلی در مرورگر ذخیره می‌شود)
-- سبد خرید، تسویه‌حساب و تاریخچه سفارش‌ها
-- وبلاگ و صفحه مقاله
+- صفحهٔ اصلی فصل‌محور (آغاز → داستان → دسته‌بندی‌ها → کاتالوگ → خدمات → ژورنال)
+- نمایش سریع محصول با گالری، انتخاب سایز/رنگ و بازگشت به همان نقطهٔ اسکرول
+- سبد خرید **بدون نیاز به ورود** (مهمان) که با ورود کاربر ادغام می‌شود
+- علاقه‌مندی‌ها، جستجوی زنده، کوپن تخفیف (`WELCOME10`) و تسویه‌حساب
+- ثبت‌نام / ورود، تاریخچه سفارش‌ها، فاکتور، وبلاگ و پنل ادمین
 
 داده‌ها در `localStorage` نگهداری می‌شوند؛ برای ریست‌کردن، `localStorage` را پاک کنید.
 
@@ -37,8 +39,35 @@ VITE_SUPABASE_URL=https://xxxx.supabase.co
 VITE_SUPABASE_ANON_KEY=xxxx
 ```
 
-با وجود این مقادیر، برنامه به‌جای بک‌اند محلی از کلاینت واقعی Supabase استفاده می‌کند و
-مایگریشن‌های موجود در `supabase/migrations` را می‌توانید روی پروژه اجرا کنید.
+با وجود این مقادیر، برنامه به‌جای بک‌اند محلی از کلاینت واقعی Supabase استفاده می‌کند. مایگریشن
+`supabase/migrations/20260926000000_immersive_commerce.sql` جدول `wishlist` و ستون‌های
+`variant`/`discount`/`coupon_code`/`sizes`/`colors` را اضافه می‌کند (idempotent است).
+
+## معماری تجربهٔ کاربری
+
+| مفهوم | پیاده‌سازی |
+| --- | --- |
+| بدون هدر/منو | `src/components/Header.tsx` فقط لوگو است؛ ناوبری با اسکرول فصل‌ها و `ChapterDots` (نقاط فصل) انجام می‌شود |
+| نوار ابزار شناور | `src/components/UtilityBar.tsx` — جستجو، علاقه‌مندی، سبد (بدون منو) |
+| نمایش سریع محصول | `src/components/ProductOverlay.tsx` — overlay تمام‌صفحه؛ با `pushState` باز می‌شود تا دکمهٔ Back آن را ببندد و اسکرول صفحه حفظ شود |
+| سبد مهمان | `src/lib/guest.ts` + `CartContext` — ذخیره در localStorage و ادغام در حساب هنگام ورود |
+| علاقه‌مندی | `WishlistContext` — همان الگوی سبد (localStorage برای مهمان، جدول `wishlist` برای کاربران) |
+| واریانت (سایز/رنگ) | `src/lib/variants.ts` — از دسته‌بندی و متن محصول استخراج می‌شود؛ اگر ستون‌های `sizes`/`colors` در DB پر باشند، آن‌ها اولویت دارند |
+| کاتالوگ یکپارچه | `src/components/Catalog.tsx` هم به‌عنوان فصل صفحهٔ اصلی و هم به‌عنوان مسیر `#shop` رندر می‌شود |
+| ۴۰۴ | مسیر ناشناخته هش به `src/components/NotFound.tsx` می‌رود |
+
+## تصاویر
+
+خط تولید تصاویر با `sharp` اجرا می‌شود و خروجی‌ها کنار عکس اصلی قرار می‌گیرند:
+
+```bash
+npm run images   # <name>-640.webp / <name>-1280.webp / <name>-detail.webp
+npm run og       # favicon.svg، apple-touch-icon.png و images/og-cover.jpg
+```
+
+همهٔ تصاویر سایت از `src/components/ResponsiveImage.tsx` رد می‌شوند (WebP + `srcset` + `loading="lazy"`).
+گالری محصول از همان عکس اصلی به‌همراه یک کراپ «جزئیات» ساخته می‌شود؛ برای فروشگاه واقعی توصیه می‌شود
+عکس‌های مدل‌پوش هم به کاتالوگ اضافه شود.
 
 ## اسکریپت‌ها
 
@@ -49,8 +78,11 @@ VITE_SUPABASE_ANON_KEY=xxxx
 | `npm run preview` | سرو کردن خروجی build |
 | `npm run lint` | اجرای ESLint |
 | `npm run typecheck` | بررسی تایپ‌ها با TypeScript |
+| `npm run images` | تولید نسخه‌های WebP و کراپ جزئیات |
+| `npm run og` | تولید favicon و تصویر اشتراک‌گذاری |
+| `npm test` | typecheck + lint + smoke test (رندر همهٔ مسیرها) + logic test (سبد مهمان، علاقه‌مندی، کوپن، واریانت) |
 
-## انتشار روی GitHub Pages
+## انتشار
 
 ورک‌فلوی `.github/workflows/deploy.yml` با هر پوش روی `main` پروژه را build و منتشر می‌کند.
 چون Pages این ریپو را زیر مسیر `/Modara/` سرو می‌کند، `vite.config.ts` هنگام build مقدار
@@ -61,18 +93,9 @@ VITE_SUPABASE_ANON_KEY=xxxx
 BASE_PATH=/ npm run build
 ```
 
-## انتشار روی Netlify
+فایل `netlify.toml` نیز در ریشهٔ پروژه تنظیمات build و redirectهای SPA برای Netlify را دارد.
 
-فایل `netlify.toml` در ریشهٔ پروژه تنظیمات build و redirectهای SPA را دارد؛ کافی است ریپو را
-در Netlify متصل کنید (Build command: `npm run build`، Publish directory: `dist`).
-برای انتشار در ریشهٔ دامنه، متغیر محیطی `BASE_PATH=/` را در تنظیمات سایت Netlify اضافه کنید.
+## پنل مدیریت
 
-## استقرار در ریشهٔ دامنه
-
-در هر پلتفرمی (Pages، Netlify، Vercel یا سرور اختصاصی) برای سرو در ریشه:
-
-```bash
-BASE_PATH=/ npm run build
-```
-
-خروجی در `dist` ساخته می‌شود و چون مسیریابی بر پایهٔ hash است، به هیچ تنظیم سروری نیاز نیست.
+مسیر `#/backoffice-login` (حساب دمو: `admin` / `admin 1234`) به پنل مدیریت می‌رود که شامل
+سفارش‌ها، محصولات، دسته‌بندی‌ها، مقالات، نظرات، کوپن‌ها، مشتریان و تنظیمات فروشگاه است.

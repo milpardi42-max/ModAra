@@ -1,6 +1,6 @@
 # راهنمای ویدئوی Hero مُدارا
 
-ویدئوی فعلی Hero از فایل ارسالی کاربر ساخته شده است. برای حفظ کیفیت و بارگذاری سریع، دو نسخه‌ی سازگار با نمایشگرهای مختلف در پروژه نگهداری می‌شود:
+ویدئوی فعلی Hero از فایل ارسالی کاربر ساخته شده است. برای حفظ کیفیت و بارگذاری سریع، دو نسخهٔ سازگار با نمایشگرهای مختلف در پروژه نگهداری می‌شود:
 
 - دسکتاپ: `public/videos/hero-woman-polishing-shoes.mp4`
 - موبایل: `public/videos/hero-woman-polishing-shoes-mobile.mp4`
@@ -8,26 +8,19 @@
 
 ## رفتار نمایش
 
-کامپوننت `src/components/HeroSlider.tsx` مسیر فایل را با helper `asset()` می‌سازد تا هم در ریشه و هم در مسیر `/ModernAra1/` گیت‌هاب‌پیجز درست کار کند. ویدئو با `muted`، `playsInline`، `autoPlay` و `loop` نمایش داده می‌شود. پخش خودکار در حالت `prefers-reduced-motion: reduce` غیرفعال است و poster نمایش داده می‌شود.
+کامپوننت `src/components/Hero.tsx` مسیر فایل را با helper `asset()` می‌سازد تا هم در ریشه و هم در مسیر `/Modara/` گیت‌هاب‌پیجز درست کار کند. ویدئو با `muted`، `playsInline`، `autoPlay` و `loop` نمایش داده می‌شود؛ `preload` همیشه روی `metadata` است تا اولین بارگذاری سنگین نباشد. پخش خودکار در حالت `prefers-reduced-motion: reduce` غیرفعال است و poster نمایش داده می‌شود.
 
-حرکت اسکرول همچنان زمان ویدئو را با پیشرفت سکشن هماهنگ می‌کند. قاب اصلی Hero به حالت قبلی بازگشته است، اما خود ویدئو داخل همان قاب با اندازه responsive کوچک‌تر نمایش داده می‌شود: حدود ۸۸٪ عرض و ارتفاع در دسکتاپ و ۹۲٪ در موبایل. برای تغییر ابعاد ویدئو، مقادیر `width`، `height` و `top` در style عنصر `video.hero-video` در `HeroSlider.tsx` را تغییر دهید.
-
-عناصر متنی و کارت‌های روی ویدئو با drag قابل جابه‌جایی هستند. موقعیت هر عنصر با کلید `modara-hero-drag-positions` در `localStorage` ذخیره می‌شود و هنگام refresh دوباره خوانده می‌شود؛ در صورت خراب یا نامعتبر بودن داده ذخیره‌شده، موقعیت پیش‌فرض جایگزین خواهد شد.
+Hero یک سکشن `100svh` است و **بدون scroll-jacking**: کاربر با یک اسکرول به فصل بعدی می‌رسد و عناصر متنی کشیدنی (drag) ندارند. دکمهٔ اصلی به `#chapter-catalog` لینک شده و در همان صفحه به کاتالوگ می‌رود.
 
 ## جایگزینی ویدئو در آینده
 
-فایل MP4 جدید دسکتاپ را با نام `hero-woman-polishing-shoes.mp4` و نسخه موبایل را با نام `hero-woman-polishing-shoes-mobile.mp4` در پوشه `public/videos/` قرار دهید. تصویر poster را در `public/images/hero-woman-polishing-poster.jpg` جایگزین کنید. اگر نام فایل‌ها تغییر کرد، مقدار `videoSrc`، مسیر نسخه موبایل و `poster` را در `HeroSlider.tsx` به‌روزرسانی کنید. برای شروع سریع‌تر MP4، metadata را با `-movflags +faststart` به ابتدای فایل منتقل کنید.
+فایل MP4 جدید دسکتاپ را با نام `hero-woman-polishing-shoes.mp4` و نسخه موبایل را با نام `hero-woman-polishing-shoes-mobile.mp4` در پوشهٔ `public/videos/` قرار دهید. تصویر poster را در `public/images/hero-woman-polishing-poster.jpg` جایگزین کنید. اگر نام فایل‌ها تغییر کرد، مقدار `videoSrc` و مسیر `poster` را در `Hero.tsx` به‌روزرسانی کنید. برای شروع سریع‌تر MP4، metadata را با `-movflags +faststart` به ابتدای فایل منتقل کنید.
 
-برای خوانایی بهتر Hero، روشنایی و overlay در خود کامپوننت کنترل می‌شوند؛ ویدئو را بیش از حد تیره نکنید، چون متن روی آن با لایه‌ی جداگانه خوانا نگه داشته می‌شود. پس از هر تغییر، این دستورات را اجرا کنید:
+## بررسی پس از تغییر
 
 ```bash
 npm run typecheck
 npm run lint
 npm run build
-```
-
-برای انتشار در GitHub Pages، مقدار base باید `/ModernAra1/` باشد. لینک نهایی سایت:
-
-```text
-https://mcdonun1-hub.github.io/ModernAra1/
+npm test
 ```
