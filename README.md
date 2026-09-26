@@ -53,10 +53,26 @@ VITE_SUPABASE_ANON_KEY=xxxx
 ## انتشار روی GitHub Pages
 
 ورک‌فلوی `.github/workflows/deploy.yml` با هر پوش روی `main` پروژه را build و منتشر می‌کند.
-چون Pages این ریپو را زیر مسیر `/ModernAra1/` سرو می‌کند، `vite.config.ts` هنگام build مقدار
-`base` را روی `/ModernAra1/` می‌گذارد و همهٔ تصاویر با تابع `asset()` (در `src/lib/format.ts`)
+چون Pages این ریپو را زیر مسیر `/Modara/` سرو می‌کند، `vite.config.ts` هنگام build مقدار
+`base` را روی `/Modara/` می‌گذارد و همهٔ تصاویر با تابع `asset()` (در `src/lib/format.ts`)
 نسبت به همان مسیر ساخته می‌شوند. برای انتشار روی دامنهٔ اختصاصی یا ریشهٔ سایت:
 
 ```bash
 BASE_PATH=/ npm run build
 ```
+
+## انتشار روی Netlify
+
+فایل `netlify.toml` در ریشهٔ پروژه تنظیمات build و redirectهای SPA را دارد؛ کافی است ریپو را
+در Netlify متصل کنید (Build command: `npm run build`، Publish directory: `dist`).
+برای انتشار در ریشهٔ دامنه، متغیر محیطی `BASE_PATH=/` را در تنظیمات سایت Netlify اضافه کنید.
+
+## استقرار در ریشهٔ دامنه
+
+در هر پلتفرمی (Pages، Netlify، Vercel یا سرور اختصاصی) برای سرو در ریشه:
+
+```bash
+BASE_PATH=/ npm run build
+```
+
+خروجی در `dist` ساخته می‌شود و چون مسیریابی بر پایهٔ hash است، به هیچ تنظیم سروری نیاز نیست.

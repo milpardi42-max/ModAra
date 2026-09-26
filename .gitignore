@@ -2,3 +2,6 @@ node_modules
 dist
 .env
 .env.local
+netlify-deploy.zip
+netlify-deploy/
+.netlify
