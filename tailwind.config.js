@@ -4,7 +4,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Beiruti', 'sans-serif'],
+        // Beiruti is the display face; the Persian system stack keeps the copy
+        // readable (and identical in shape) whenever the webfont is slow or blocked.
+        sans: ['Beiruti', 'Vazirmatn', 'IRANSansX', 'IRANSans', 'Geeza Pro', 'Segoe UI', 'Tahoma', 'system-ui', 'sans-serif'],
       },
       colors: {
         primary: {

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Check, Search, SlidersHorizontal, Star, X } from 'lucide-react';
+import { Check, ChevronDown, Search, SlidersHorizontal, Star, X } from 'lucide-react';
 import { supabase, type Product, type Category } from '../lib/supabase';
 import { seedCategories, seedProducts } from '../lib/demoSeed';
 import ProductCard from './ProductCard';
@@ -11,6 +11,9 @@ type CatalogProps = {
   /** `section` renders inside the home page story; `page` is the standalone view. */
   variant?: 'section' | 'page';
 };
+
+/** How many cards render at once; the rest arrive with «نمایش بیشتر». */
+const PAGE_SIZE = 24;
 
 type PriceInputProps = {
   value: number | null;
@@ -36,6 +39,7 @@ export default function Catalog({ onQuickView, initialCategory = null, variant =
   const [minRating, setMinRating] = useState(0);
   const [inStockOnly, setInStockOnly] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   useEffect(() => {
     setActiveCategory(initialCategory ?? null);
@@ -45,6 +49,11 @@ export default function Catalog({ onQuickView, initialCategory = null, variant =
     const timer = window.setTimeout(() => setSearch(searchInput.trim()), 250);
     return () => window.clearTimeout(timer);
   }, [searchInput]);
+
+  // A new result set starts from the first page again.
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [search, activeCategory, sortBy, priceMin, priceMax, minRating, inStockOnly]);
 
   useEffect(() => {
     let cancelled = false;
@@ -65,6 +74,7 @@ export default function Catalog({ onQuickView, initialCategory = null, variant =
       cancelled = true;
     };
   }, []);
+
 
   const maxCatalogPrice = useMemo(() => Math.max(...products.map((product) => product.price), 0), [products]);
   const activeCategoryId = categories.find((category) => category.slug === activeCategory)?.id;
@@ -98,6 +108,10 @@ export default function Catalog({ onQuickView, initialCategory = null, variant =
       return b.rating - a.rating;
     });
   }, [activeCategory, activeCategoryId, inStockOnly, minRating, priceMax, priceMin, products, search, sortBy]);
+
+  // Incremental rendering: the first page of cards paints immediately and the
+  // rest arrive with «نمایش بیشتر», so a 94-product catalogue stays cheap.
+  const shownProducts = useMemo(() => visibleProducts.slice(0, visibleCount), [visibleProducts, visibleCount]);
 
   const activeFilterCount = [activeCategory, priceMin !== null, priceMax !== null, minRating > 0, inStockOnly].filter(Boolean).length;
 
@@ -259,7 +273,15 @@ export default function Catalog({ onQuickView, initialCategory = null, variant =
           <div className="min-w-0 flex-1">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
               <p className="text-sm text-dark-500">
-                {loading ? 'در حال بارگذاری...' : `${new Intl.NumberFormat('fa-IR').format(visibleProducts.length)} محصول یافت شد`}
+                {loading
+                  ? 'در حال بارگذاری...'
+                  : `${new Intl.NumberFormat('fa-IR').format(visibleProducts.length)} محصول یافت شد`}
+                {!loading && shownProducts.length < visibleProducts.length && (
+                  <span className="text-dark-400">
+                    {' · '}
+                    {new Intl.NumberFormat('fa-IR').format(shownProducts.length)} تا نمایش داده شد
+                  </span>
+                )}
               </p>
               {search && <p className="rounded-full bg-amber-50 px-3 py-1 text-xs text-amber-700">نتایج برای «{search}»</p>}
             </div>
@@ -284,11 +306,28 @@ export default function Catalog({ onQuickView, initialCategory = null, variant =
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
-                {visibleProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} onQuickView={onQuickView} />
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+                  {shownProducts.map((product) => (
+                    <ProductCard key={product.id} product={product} onQuickView={onQuickView} />
+                  ))}
+                </div>
+
+              {shownProducts.length < visibleProducts.length && (
+                <div className="mt-8 flex flex-col items-center gap-2">
+                  <button
+                    onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
+                    className="group inline-flex items-center gap-2 rounded-full border border-dark-200 bg-white px-6 py-3 text-sm font-bold text-dark-900 transition-all hover:-translate-y-0.5 hover:border-amber-300 hover:text-amber-700 hover:shadow-lg active:scale-95"
+                  >
+                    نمایش بیشتر
+                    <span className="text-xs font-medium text-dark-400">
+                      ({new Intl.NumberFormat('fa-IR').format(visibleProducts.length - shownProducts.length)} مورد باقی‌مانده)
+                    </span>
+                    <ChevronDown className="h-4 w-4 transition-transform group-hover:translate-y-0.5" />
+                  </button>
+                </div>
+              )}
+              </>
             )}
           </div>
         </div>
