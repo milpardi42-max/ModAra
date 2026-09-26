@@ -23,6 +23,8 @@ export default function Hero() {
   }, []);
 
   const videoSrc = asset('/videos/hero-woman-polishing-shoes.mp4');
+  // Phones get the 0.5 MB cut instead of the 2.7 MB desktop master.
+  const videoSrcMobile = asset('/videos/hero-woman-polishing-shoes-mobile.mp4');
 
   return (
     <section
@@ -43,6 +45,7 @@ export default function Hero() {
         disablePictureInPicture
         aria-label="ویدئوی تبلیغاتی مراقبت از کفش و اکسسوری مُدارا"
       >
+        <source src={videoSrcMobile} type="video/mp4" media="(max-width: 768px)" />
         <source src={videoSrc} type="video/mp4" />
         مرورگر شما از پخش ویدئو پشتیبانی نمی‌کند.
       </video>

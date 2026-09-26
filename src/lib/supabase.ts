@@ -1,4 +1,4 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { localBackend } from './localBackend';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -11,20 +11,31 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
  */
 export const isDemoMode = !supabaseUrl || !supabaseAnonKey;
 
-export const supabase = (
-  isDemoMode
-    ? localBackend
-    : createClient(supabaseUrl, supabaseAnonKey, {
-        auth: {
-          persistSession: true,
-          autoRefreshToken: true,
-          storage: window.localStorage,
-          storageKey: 'modara-auth',
-          detectSessionInUrl: true,
-          flowType: 'implicit',
-        },
-      })
-) as SupabaseClient;
+/**
+ * The Supabase SDK is ~120 kB of JavaScript that the demo backend never needs,
+ * so it is imported dynamically by `bootstrapBackend()` and shipped as its own
+ * chunk. Everything that only needs types keeps a type-only import above, so
+ * the demo/IDE build never downloads it.
+ */
+export let supabase: SupabaseClient = isDemoMode
+  ? (localBackend as unknown as SupabaseClient)
+  : (null as unknown as SupabaseClient);
+
+/** Resolves the real client once, before the first render. */
+export async function bootstrapBackend(): Promise<void> {
+  if (isDemoMode || supabase) return;
+  const { createClient } = await import('@supabase/supabase-js');
+  supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      storage: window.localStorage,
+      storageKey: 'modara-auth',
+      detectSessionInUrl: true,
+      flowType: 'implicit',
+    },
+  });
+}
 
 if (isDemoMode) {
   console.info('[ModAra] Running in local demo mode (no Supabase credentials found).');

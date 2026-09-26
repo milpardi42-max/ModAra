@@ -44,9 +44,25 @@
       }
     </script>
 
+    <!-- LCP: the hero poster paints before the video stream arrives. -->
+    <link rel="preload" as="image" href="images/hero-woman-polishing-poster.jpg" fetchpriority="high" />
+
+    <!--
+      Beiruti is a display face, so it must never block the first paint: the
+      stylesheet loads after `load` and the copy renders immediately in the
+      Persian system stack, then swaps to Beiruti when it arrives.
+    -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Beiruti:wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Beiruti:wght@200;300;400;500;600;700;800;900&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link href="https://fonts.googleapis.com/css2?family=Beiruti:wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    </noscript>
   </head>
   <body>
     <div id="root"></div>

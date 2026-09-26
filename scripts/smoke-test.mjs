@@ -45,9 +45,17 @@ globalThis.IntersectionObserver = class {
 };
 
 const { createServer } = await import('vite');
-const server = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom', logLevel: 'error' });
+const server = await createServer({
+  root: process.cwd(),
+  server: { middlewareMode: true },
+  appType: 'custom',
+  logLevel: 'error',
+});
 
 const App = (await server.ssrLoadModule('/src/App.tsx')).default;
+
+/** Text rendered by App's route Suspense fallback. */
+const FALLBACK_MARKER = 'data-route-fallback';
 
 const routes = [
   { hash: '', label: 'home' },
@@ -61,13 +69,29 @@ const routes = [
   { hash: '#totally-unknown-route', label: '404' },
 ];
 
+/**
+ * Routes are code-split with React.lazy, so the first synchronous pass only
+ * renders the Suspense fallback. Wait until the lazy chunk resolves (the
+ * fallback marker disappears) and render again, so this test still covers the
+ * real page and not just the loading state.
+ */
+async function renderRoute() {
+  let html = renderToString(React.createElement(App));
+  for (let attempt = 0; attempt < 40 && html.includes(FALLBACK_MARKER); attempt += 1) {
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    html = renderToString(React.createElement(App));
+  }
+  return html;
+}
+
 let failures = 0;
 for (const route of routes) {
   window.location.hash = route.hash;
   try {
-    const html = renderToString(React.createElement(App));
+    const html = await renderRoute();
     const meaningful = html.length > 2000;
     if (!meaningful) throw new Error(`render too small (${html.length} chars)`);
+    if (html.includes(FALLBACK_MARKER)) throw new Error('route chunk never resolved');
     console.log(`  ok  ${route.label.padEnd(24)} ${html.length} chars`);
   } catch (error) {
     failures += 1;

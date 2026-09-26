@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, lazy, Suspense } from 'react';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
@@ -6,26 +6,32 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import CartDrawer from './components/CartDrawer';
 import AuthModal from './components/AuthModal';
-import CheckoutModal from './components/CheckoutModal';
-import ChatWidget from './components/ChatWidget';
 import ScrollToTop from './components/ScrollToTop';
 import BackgroundDecor from './components/BackgroundDecor';
 import UtilityBar from './components/UtilityBar';
 import SearchOverlay from './components/SearchOverlay';
 import WishlistPanel from './components/WishlistPanel';
-import ProductOverlay from './components/ProductOverlay';
 import ChapterDots from './components/ChapterDots';
 import NotFound from './components/NotFound';
 import Home from './pages/Home';
-import Shop from './pages/Shop';
-import Blog from './pages/Blog';
-import BlogPostPage from './pages/BlogPostPage';
-import Account from './pages/Account';
-import AdminPanel from './pages/AdminPanel';
-import AdminLogin from './pages/AdminLogin';
-import PaymentCallback from './pages/PaymentCallback';
-import Invoice from './pages/Invoice';
 import { supabase } from './lib/supabase';
+
+/*
+ * Route-level code splitting: Home is the landing chapter and stays in the
+ * entry chunk, every other route (and the heavy overlays) is fetched on
+ * demand. The likely next hops are prefetched while the browser is idle.
+ */
+const Shop = lazy(() => import('./pages/Shop'));
+const Blog = lazy(() => import('./pages/Blog'));
+const BlogPostPage = lazy(() => import('./pages/BlogPostPage'));
+const Account = lazy(() => import('./pages/Account'));
+const AdminPanel = lazy(() => import('./pages/AdminPanel'));
+const AdminLogin = lazy(() => import('./pages/AdminLogin'));
+const PaymentCallback = lazy(() => import('./pages/PaymentCallback'));
+const Invoice = lazy(() => import('./pages/Invoice'));
+const ProductOverlay = lazy(() => import('./components/ProductOverlay'));
+const CheckoutModal = lazy(() => import('./components/CheckoutModal'));
+const ChatWidget = lazy(() => import('./components/ChatWidget'));
 
 type View =
   | { name: 'home' }
@@ -257,6 +263,19 @@ function AppContent() {
     };
   }, [view, overlaySlug]);
 
+  // Warm the route chunks the shopper is most likely to open next, while the
+  // browser is idle. This costs nothing on first paint and makes navigation to
+  // the catalogue and the journal feel instant.
+  useEffect(() => {
+    const warm = () => {
+      void import('./pages/Shop');
+      void import('./pages/Blog');
+    };
+    const idle = window as unknown as { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => void };
+    if (idle.requestIdleCallback) idle.requestIdleCallback(warm, { timeout: 2500 });
+    else window.setTimeout(warm, 1800);
+  }, []);
+
   /* ------------------------------------------------------------------ view */
 
   const isPaymentCallback = view.name === 'payment-callback';
@@ -274,16 +293,18 @@ function AppContent() {
       {!isUtilityPage && !isAdmin && <Header onNavigate={handleNavigate} />}
 
       <main className="flex-1">
-        {view.name === 'home' && <Home onNavigate={handleNavigate} onQuickView={quickView} focusCatalog={false} catalogCategory={null} />}
-        {view.name === 'shop' && <Shop onQuickView={quickView} initialCategory={view.category} />}
-        {view.name === 'blog' && <Blog onNavigate={handleNavigate} />}
-        {view.name === 'blog-post' && <BlogPostPage slug={view.slug} onNavigate={handleNavigate} />}
-        {view.name === 'account' && <Account onNavigate={handleNavigate} onOpenAuth={() => setAuthOpen(true)} />}
-        {view.name === 'admin-login' && <AdminLogin onNavigate={handleNavigate} />}
-        {view.name === 'admin' && <AdminPanel onNavigate={handleNavigate} onOpenAuth={() => handleNavigate('admin-login')} />}
-        {view.name === 'payment-callback' && <PaymentCallback onNavigate={handleNavigate} />}
-        {view.name === 'invoice' && <Invoice orderId={view.orderId} onNavigate={handleNavigate} />}
-        {view.name === 'not-found' && <NotFound onNavigate={handleNavigate} />}
+        <Suspense fallback={<RouteFallback />}>
+          {view.name === 'home' && <Home onNavigate={handleNavigate} onQuickView={quickView} focusCatalog={false} catalogCategory={null} />}
+          {view.name === 'shop' && <Shop onQuickView={quickView} initialCategory={view.category} />}
+          {view.name === 'blog' && <Blog onNavigate={handleNavigate} />}
+          {view.name === 'blog-post' && <BlogPostPage slug={view.slug} onNavigate={handleNavigate} />}
+          {view.name === 'account' && <Account onNavigate={handleNavigate} onOpenAuth={() => setAuthOpen(true)} />}
+          {view.name === 'admin-login' && <AdminLogin onNavigate={handleNavigate} />}
+          {view.name === 'admin' && <AdminPanel onNavigate={handleNavigate} onOpenAuth={() => handleNavigate('admin-login')} />}
+          {view.name === 'payment-callback' && <PaymentCallback onNavigate={handleNavigate} />}
+          {view.name === 'invoice' && <Invoice orderId={view.orderId} onNavigate={handleNavigate} />}
+          {view.name === 'not-found' && <NotFound onNavigate={handleNavigate} />}
+        </Suspense>
       </main>
 
       {!isUtilityPage && !isAdmin && <Footer onNavigate={handleNavigate} />}
@@ -308,15 +329,17 @@ function AppContent() {
 
       {!isUtilityPage && !isAdmin && <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />}
       {!isUtilityPage && !isAdmin && (
-        <CheckoutModal
-          open={checkoutOpen}
+        <Suspense fallback={null}>
+          <CheckoutModal
+            open={checkoutOpen}
           onClose={() => setCheckoutOpen(false)}
           onOpenInvoice={(id) => handleNavigate('invoice', id)}
-          onOpenAuth={() => {
-            setCheckoutOpen(false);
-            setAuthOpen(true);
-          }}
-        />
+            onOpenAuth={() => {
+              setCheckoutOpen(false);
+              setAuthOpen(true);
+            }}
+          />
+        </Suspense>
       )}
 
       {!isUtilityPage && !isAdmin && (
@@ -327,17 +350,35 @@ function AppContent() {
       )}
 
       {overlaySlug && (
-        <ProductOverlay
-          key={overlaySlug}
-          slug={overlaySlug}
-          onClose={closeProduct}
-          onSelectProduct={quickView}
-          onOpenAuth={() => setAuthOpen(true)}
-        />
+        <Suspense fallback={null}>
+          <ProductOverlay
+            key={overlaySlug}
+            slug={overlaySlug}
+            onClose={closeProduct}
+            onSelectProduct={quickView}
+            onOpenAuth={() => setAuthOpen(true)}
+          />
+        </Suspense>
       )}
 
-      {!isUtilityPage && !isAdmin && <ChatWidget />}
+      {!isUtilityPage && !isAdmin && (
+        <Suspense fallback={null}>
+          <ChatWidget />
+        </Suspense>
+      )}
       {!isUtilityPage && !isAdmin && <ScrollToTop />}
+    </div>
+  );
+}
+
+/** Shown for a split second while a route chunk is fetched. */
+function RouteFallback() {
+  return (
+    <div className="flex min-h-[55vh] items-center justify-center" role="status" aria-live="polite" data-route-fallback="">
+      <div className="flex flex-col items-center gap-3">
+        <span className="h-7 w-7 animate-spin rounded-full border-2 border-dark-200 border-t-amber-500" />
+        <span className="text-xs text-dark-400">در حال بارگذاری…</span>
+      </div>
     </div>
   );
 }

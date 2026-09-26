@@ -9,7 +9,29 @@ export default defineConfig(({ command }) => ({
   base: command === 'build' ? process.env.BASE_PATH ?? '/Modara/' : '/',
   plugins: [react()],
   optimizeDeps: {
-    exclude: ['lucide-react'],
+    // lucide-react's ESM entry imports one module per icon (~1500 files).
+    // Pre-bundling it keeps the dev server / in-browser IDE from firing
+    // hundreds of requests before the first paint.
+    include: ['lucide-react', 'react', 'react-dom', 'react-dom/client'],
+  },
+  build: {
+    // Modern syntax only: smaller output, no legacy transpilation tax.
+    target: 'es2020',
+    cssCodeSplit: true,
+    // Browsers that understand <link rel="modulepreload"> do not need the polyfill.
+    modulePreload: { polyfill: false },
+    reportCompressedSize: false,
+    chunkSizeWarningLimit: 700,
+    rollupOptions: {
+      output: {
+        // React is stable across deploys: a separate chunk keeps it cached.
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return undefined;
+          if (id.includes('react-dom') || /[\\/]react[\\/]/.test(id) || id.includes('scheduler')) return 'react';
+          return 'vendor';
+        },
+      },
+    },
   },
   server: {
     host: '0.0.0.0',
