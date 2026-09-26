@@ -3,7 +3,7 @@ import { ArrowLeft, Gem, Glasses, Package, RefreshCw, Shield, Shirt, ShoppingBag
 import { supabase, type Product, type BlogPost, type Category } from '../lib/supabase';
 import { seedCategories, seedProducts } from '../lib/demoSeed';
 import { formatDate } from '../lib/format';
-import ProductCard from '../components/ProductCard';
+import EditorialPiece from '../components/EditorialPiece';
 import ResponsiveImage from '../components/ResponsiveImage';
 import Hero from '../components/Hero';
 import Catalog from '../components/Catalog';
@@ -89,27 +89,90 @@ export default function Home({ onNavigate, onQuickView, focusCatalog = false, ca
     <div>
       <Hero />
 
-      {/* Chapter: editorial story with shoppable pieces */}
+      {/* Chapter: the private edit — an editorial spread of curated pieces */}
       <section id="chapter-story" className="mx-auto max-w-7xl scroll-mt-20 px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
-        <div className="mb-8 text-center sm:mb-10">
-          <p className="mb-2 text-xs font-bold uppercase tracking-[0.32em] text-amber-600">MODARA PRIVATE EDIT</p>
-          <h2 className="text-2xl font-bold text-dark-900 sm:text-3xl">انتخاب‌های ماندگار این فصل</h2>
-          <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-dark-500 sm:text-base">
-            هر قطعه با دقت انتخاب شده تا استایل روزمره شما را کامل کند — از پارچه‌های طبیعی تا جزئیاتی که
-            امضای شخصی شما می‌شوند.
-          </p>
-        </div>
+        <div className="relative overflow-hidden rounded-[1.75rem] border border-dark-100 bg-[#f4eee5] px-4 py-10 sm:rounded-[2.5rem] sm:px-8 sm:py-12 lg:px-12">
+          {/* Warm paper light: the chapter reads as a printed spread. */}
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_92%_-18%,rgba(245,158,11,0.20),transparent_46%),radial-gradient(circle_at_2%_112%,rgba(126,78,45,0.13),transparent_44%)]" />
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          {storyItems.map((product, index) => (
-            <article
-              key={product.id}
-              className="animate-fade-in-up"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              <ProductCard product={product} onQuickView={onQuickView} />
-            </article>
-          ))}
+          <div className="relative">
+            {/* Masthead: display headline beside the editor's note */}
+            <div className="grid gap-7 lg:grid-cols-[1.25fr_1fr] lg:items-end lg:gap-14">
+              <div>
+                <div className="flex items-center gap-3">
+                  <span className="h-px w-10 bg-amber-600/60" />
+                  <span className="text-[11px] font-bold uppercase tracking-[0.34em] text-amber-700">
+                    MODARA PRIVATE EDIT
+                  </span>
+                </div>
+                <h2 className="mt-4 text-3xl font-black leading-[1.2] tracking-tight text-dark-900 text-balance sm:text-4xl lg:text-[2.75rem]">
+                  انتخاب‌های ماندگار
+                  <span className="mt-1 block bg-gradient-to-l from-amber-600 via-amber-500 to-accent-500 bg-clip-text text-transparent">
+                    این فصل
+                  </span>
+                </h2>
+              </div>
+
+              <div className="lg:border-r lg:border-dark-200/80 lg:pr-10">
+                <p className="max-w-md text-sm leading-7 text-dark-600 sm:text-[0.95rem]">
+                  هر قطعه با دقت انتخاب شده تا استایل روزمره شما را کامل کند — از پارچه‌های طبیعی تا جزئیاتی که
+                  امضای شخصی شما می‌شوند.
+                </p>
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  {['پارچهٔ طبیعی', 'ساخت محدود', 'انتخاب سرراست'].map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-full border border-dark-200/80 bg-white/70 px-3 py-1.5 text-[11px] font-semibold text-dark-600"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Pieces: one lead frame plus two stacked strips */}
+            <div className="mt-9 grid gap-4 sm:mt-11 sm:gap-5 lg:grid-cols-12 lg:gap-6">
+              {storyItems[0] && (
+                <EditorialPiece
+                  product={storyItems[0]}
+                  index={0}
+                  onQuickView={onQuickView}
+                  className="lg:col-span-7"
+                />
+              )}
+              {storyItems.length > 1 && (
+                <div className="grid gap-4 sm:grid-cols-2 sm:gap-5 lg:col-span-5 lg:grid-cols-1 lg:grid-rows-2 lg:gap-6">
+                  {storyItems.slice(1, 3).map((product, offset) => (
+                    <EditorialPiece
+                      key={product.id}
+                      product={product}
+                      index={offset + 1}
+                      variant="stack"
+                      onQuickView={onQuickView}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Spread footer */}
+            <div className="mt-9 flex flex-col items-center gap-3 sm:mt-10">
+              <button
+                onClick={() => {
+                  setActiveCategory(null);
+                  catalogRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }}
+                className="group inline-flex items-center gap-2 rounded-full bg-dark-900 px-6 py-3 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-dark-800 hover:shadow-lg active:scale-95"
+              >
+                مشاهدهٔ همهٔ انتخاب‌ها
+                <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+              </button>
+              <span className="text-[11px] text-dark-400">
+                {new Intl.NumberFormat('fa-IR').format(storyItems.length)} قطعهٔ منتخب این فصل
+              </span>
+            </div>
+          </div>
         </div>
       </section>
 
