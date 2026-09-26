@@ -1,0 +1,102 @@
+{
+  "comment": "Manifest of commissioned category photography. Each source image is shot with a specific art direction and tagged with garment type, colour and audience so products can be matched to the most relevant frame. Frames (full / detail / mirror) are derived by scripts/build-category-frames.mjs.",
+  "artDirection": {
+    "clothing": "editorial model photography, warm terracotta and cream studio backdrop",
+    "pants": "street-style model photography, light concrete and plaster backdrop",
+    "glasses": "beauty close-up portrait, soft gradient studio backdrop",
+    "watch": "macro wrist photography on stone pedestal, dramatic luxe lighting",
+    "bag": "model carrying the bag plus still life, warm neutral editorial",
+    "accessory": "minimal still-life macro on linen and stone"
+  },
+  "sources": [
+    { "file": "clothing/classic-white-shirt", "category": "clothing", "type": "shirt", "color": "سفید", "audience": "men" },
+    { "file": "clothing/denim-jacket-men", "category": "clothing", "type": "jacket", "color": "آبی", "audience": "men" },
+    { "file": "clothing/oxford-blue-shirt-men", "category": "clothing", "type": "shirt", "color": "آبی", "audience": "men" },
+    { "file": "clothing/polo-shirt-green-men", "category": "clothing", "type": "polo", "color": "سبز", "audience": "men" },
+    { "file": "clothing/basic-tshirt-black-men", "category": "clothing", "type": "tshirt", "color": "مشکی", "audience": "men" },
+    { "file": "clothing/hoodie-charcoal-men", "category": "clothing", "type": "hoodie", "color": "خاکستری", "audience": "men" },
+    { "file": "clothing/knit-sweater-gray-men", "category": "clothing", "type": "sweater", "color": "خاکستری", "audience": "men" },
+    { "file": "clothing/wool-blazer-navy-men", "category": "clothing", "type": "blazer", "color": "سرمه‌ای", "audience": "men" },
+    { "file": "clothing/hoodie-blush-women", "category": "clothing", "type": "hoodie", "color": "صورتی", "audience": "women" }
+  ],
+  "typeKeywords": {
+    "clothing": {
+      "dress": ["میدی", "پیراهن میدی"],
+      "coat": ["ترنچ"],
+      "blazer": ["کت"],
+      "jacket": ["ژاکت جین", "ژاکت"],
+      "cardigan": ["ژاکت بافت", "بافت"],
+      "shirt": ["پیراهن"],
+      "polo": ["پولوشرت"],
+      "tshirt": ["تی‌شرت"],
+      "hoodie": ["هودی"],
+      "sweater": ["پلیور"],
+      "blouse": ["بلوز"]
+    },
+    "pants": {
+      "cargo": ["کارگو"],
+      "chino": ["چینو"],
+      "jeans": ["جین"],
+      "jogger": ["جاگر"],
+      "leggings": ["لگ"],
+      "linen": ["کتان"],
+      "paperbag": ["پیپربگ"],
+      "trousers": ["شلوار"]
+    },
+    "glasses": {
+      "sunglasses": ["آفتابی"],
+      "optical": ["طبی"]
+    },
+    "watch": {
+      "chronograph": ["کرنوگراف"],
+      "diver": ["غواصی"],
+      "skeleton": ["اسکلتون"],
+      "digital": ["دیجیتال"],
+      "smart": ["هوشمند"],
+      "minimal": ["مینیمال"],
+      "field": ["فیلد"],
+      "pilot": ["خلبانی"],
+      "moonphase": ["مون‌فاز"],
+      "watch": ["ساعت"]
+    },
+    "bag": {
+      "tote": ["توت"],
+      "backpack": ["کوله"],
+      "messenger": ["دوشی مردانه"],
+      "crossbody": ["کراس", "دوشی زنانه"],
+      "shoulder": ["دوشی"],
+      "clutch": ["کلاچ"],
+      "briefcase": ["اداری"],
+      "satchel": ["ساچل"],
+      "duffel": ["ساک"],
+      "bucket": ["باکت"],
+      "beltbag": ["کمری"],
+      "quilted": ["لوزی"],
+      "straw": ["حصیری"],
+      "bag": ["کیف"]
+    },
+    "accessory": {
+      "belt": ["کمربند"],
+      "wallet": ["کیف پول"],
+      "cardholder": ["جاکارتی"],
+      "gloves": ["دستکش"],
+      "hat": ["کلاه"],
+      "cap": ["بیسبالی"],
+      "scarf": ["شال"],
+      "necklace": ["گردنبند"],
+      "earrings": ["گوشواره"],
+      "bracelet": ["دستبند"],
+      "ring": ["انگشتر"],
+      "jewelryset": ["ست جواهری"]
+    }
+  },
+  "pending": {
+    "pants": 15,
+    "glasses": 15,
+    "watch": 17,
+    "bag": 15,
+    "accessory": 15,
+    "categoryCards": 6,
+    "blog": 3
+  }
+}
