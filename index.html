@@ -44,8 +44,18 @@
       }
     </script>
 
-    <!-- LCP: the hero poster paints before the video stream arrives. -->
-    <link rel="preload" as="image" href="images/hero-woman-polishing-poster.jpg" fetchpriority="high" />
+    <!--
+      LCP: the lead cover of the hero wall is the largest thing above the
+      fold, so it is warmed with the same srcset/sizes the component asks for.
+    -->
+    <link
+      rel="preload"
+      as="image"
+      href="images/hero-covers/cover-style-640.webp"
+      imagesrcset="images/hero-covers/cover-style-640.webp 640w, images/hero-covers/cover-style-1280.webp 1280w"
+      imagesizes="(max-width: 1024px) 92vw, 42vw"
+      fetchpriority="high"
+    />
 
     <!--
       Beiruti is a display face, so it must never block the first paint: the

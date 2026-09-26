@@ -113,7 +113,7 @@ export default function Home({ onNavigate, onQuickView, focusCatalog = false, ca
 
   return (
     <div>
-      <Hero />
+      <Hero onSelectCategory={handleCategoryClick} />
 
       {/* Chapter: the private edit — an editorial spread of curated pieces */}
       <section id="chapter-story" className="mx-auto max-w-7xl scroll-mt-20 px-4 py-12 sm:px-6 sm:py-16 lg:px-8">

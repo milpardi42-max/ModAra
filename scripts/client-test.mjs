@@ -136,6 +136,34 @@ if (addButton) {
   check('guest cart persists to localStorage', Boolean(stored), stored ? `${JSON.parse(stored).length} line(s)` : 'empty');
 }
 
+/* ----------------------------------------------------------- the cover wall */
+await mount('', 'بیان شخصیت شماست');
+const coverByTitle = (title) =>
+  [...window.document.querySelectorAll('button')].find((button) => button.textContent?.includes(title));
+
+const wallTitles = ['استایل روزمره', 'لحظهٔ دقیق', 'نور و چهره', 'همراه همیشگی'];
+check('the hero wall shows four covers', wallTitles.every((title) => Boolean(coverByTitle(title))));
+
+const noteText = () => window.document.body.textContent || '';
+check('the masthead opens on the lead note', noteText().includes('بلزر، شلوار واسه'));
+
+const glassesCover = coverByTitle('نور و چهره');
+if (glassesCover) {
+  await act(async () => {
+    glassesCover.focus();
+  });
+  check('focusing a cover swaps the editor note', noteText().includes('عینک‌های آفتابی با فریم لاک‌پشتی'));
+}
+
+const watchCover = coverByTitle('لحظهٔ دقیق');
+if (watchCover) {
+  check('covers expose pressed state', watchCover.getAttribute('aria-pressed') === 'false');
+  await act(async () => {
+    watchCover.click();
+  });
+  check('clicking a cover marks it selected', watchCover.getAttribute('aria-pressed') === 'true');
+}
+
 /* --------------------------------------------------------- member coupon */
 await mount('', 'کد تخفیف اعضا');
 const couponChip = [...window.document.querySelectorAll('button')].find((button) =>
