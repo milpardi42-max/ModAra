@@ -3,6 +3,7 @@ import { ArrowLeft, Gem, Glasses, Package, RefreshCw, Shield, Shirt, ShoppingBag
 import { supabase, type Product, type BlogPost, type Category } from '../lib/supabase';
 import { seedCategories, seedProducts } from '../lib/demoSeed';
 import { formatDate } from '../lib/format';
+import { CATEGORY_PRESENTATION } from '../lib/categories';
 import EditorialPiece from '../components/EditorialPiece';
 import ResponsiveImage from '../components/ResponsiveImage';
 import Hero from '../components/Hero';
@@ -32,6 +33,19 @@ const categoryImages: Record<string, string> = {
   watch: '/images/cat-watch.jpg',
   bag: '/images/cat-bag.jpg',
   accessory: '/images/cat-accessory.jpg',
+};
+
+/**
+ * Grid placement for the six department tiles on large screens
+ * (6 columns x 2 rows). Unknown indexes simply fall back to auto-placement.
+ */
+const MOSAIC_PLACEMENT: Record<number, string> = {
+  0: 'col-span-2 lg:col-span-3 lg:row-span-2',
+  1: 'lg:col-start-4 lg:row-start-1',
+  2: 'lg:col-start-5 lg:row-start-1',
+  3: 'lg:col-start-4 lg:row-start-2',
+  4: 'lg:col-start-5 lg:row-start-2',
+  5: 'lg:col-start-6 lg:row-start-1 lg:row-span-2',
 };
 
 const storyFallback = seedProducts
@@ -176,42 +190,67 @@ export default function Home({ onNavigate, onQuickView, focusCatalog = false, ca
         </div>
       </section>
 
-      {/* Chapter: categories */}
+      {/* Chapter: categories — an editorial mosaic that filters the catalog */}
       <section id="chapter-categories" className="mx-auto max-w-7xl scroll-mt-20 px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
-        <div className="mb-8 text-center sm:mb-10">
-          <h2 className="mb-2 text-2xl font-bold text-dark-900 sm:text-3xl">دسته‌بندی محصولات</h2>
-          <p className="text-sm text-dark-500 sm:text-base">روی هر دسته‌بندی کلیک کنید تا کاتالوگ آن فیلتر شود</p>
+        <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr] lg:items-end lg:gap-14">
+          <div>
+            <div className="flex items-center gap-3">
+              <span className="h-px w-10 bg-amber-600/60" />
+              <span className="text-[11px] font-bold uppercase tracking-[0.34em] text-amber-700">دسته‌بندی‌ها</span>
+            </div>
+            <h2 className="mt-4 text-3xl font-black leading-[1.2] tracking-tight text-dark-900 text-balance sm:text-4xl">
+              شش دنیای
+              <span className="bg-gradient-to-l from-amber-600 via-amber-500 to-accent-500 bg-clip-text text-transparent">مُدارا</span>
+            </h2>
+          </div>
+          <div className="lg:border-r lg:border-dark-200/80 lg:pr-10">
+            <p className="max-w-md text-sm leading-7 text-dark-600 sm:text-[0.95rem]">
+              روی هر دسته کلیک کنید تا کاتالوگ همان‌جا فیلتر شود — از ست‌های ادیتوریال پوشاک تا استیل‌لایف مینیمال اکسسوری.
+            </p>
+          </div>
         </div>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6">
+
+        <div className="mt-8 grid grid-cols-2 gap-3 sm:mt-10 sm:gap-4 lg:h-[30rem] lg:grid-cols-6 lg:grid-rows-2 lg:gap-4">
           {categories.map((category, index) => {
             const Icon = iconMap[category.icon || ''] || Shirt;
             const isActive = activeCategory === category.slug;
+            const tagline = CATEGORY_PRESENTATION[category.slug]?.tagline;
+            const isLead = index === 0;
+            // Explicit placement fills the 6x2 mosaic with no gaps and no overlap:
+            // the lead piece takes a 3x2 block, two tiles sit beside it in each
+            // row and the last one spans both rows.
+            const placement = MOSAIC_PLACEMENT[index] ?? '';
             return (
               <button
                 key={category.id}
                 onClick={() => handleCategoryClick(category.slug)}
                 aria-pressed={isActive}
-                className={`group relative overflow-hidden rounded-2xl border transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/10 animate-fade-in-up ${
-                  isActive ? 'border-amber-500 ring-2 ring-amber-500/30' : 'border-dark-100 bg-white'
-                }`}
+                aria-label={`فیلتر کاتالوگ بر اساس ${category.name}`}
+                className={`group relative animate-fade-in-up overflow-hidden rounded-[1.35rem] border text-right transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl hover:shadow-amber-500/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
+                  isLead ? 'aspect-[16/10] lg:aspect-auto' : 'aspect-[4/5] lg:aspect-auto'
+                } ${placement} ${isActive ? 'border-amber-500 ring-2 ring-amber-500/30' : 'border-dark-100'}`}
                 style={{ animationDelay: `${index * 80}ms` }}
               >
-                <div className="relative aspect-[3/4] overflow-hidden bg-dark-50">
-                  <ResponsiveImage
-                    src={categoryImages[category.slug]}
-                    alt={category.name}
-                    sizes="(max-width: 640px) 46vw, 180px"
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-dark-950/70 to-transparent" />
-                  <div className="absolute bottom-0 right-0 left-0 p-3 text-center">
-                    <div className="mb-1.5 flex justify-center">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/20 text-white backdrop-blur-sm">
-                        <Icon className="h-5 w-5" />
-                      </div>
-                    </div>
-                    <span className="text-sm font-semibold text-white">{category.name}</span>
+                <ResponsiveImage
+                  src={categoryImages[category.slug]}
+                  alt={category.name}
+                  sizes={isLead ? '(max-width: 1024px) 92vw, 48vw' : '(max-width: 1024px) 46vw, 16vw'}
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.07]"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-dark-950/88 via-dark-950/15 to-transparent" />
+                <div className="absolute inset-0 ring-1 ring-inset ring-white/10" />
+
+                <div className="absolute inset-x-0 bottom-0 p-3.5 sm:p-4">
+                  <div className="mb-2 flex items-center gap-2">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/15 text-white backdrop-blur-md">
+                      <Icon className="h-[18px] w-[18px]" />
+                    </span>
+                    {isLead && (
+                      <span className="rounded-full bg-amber-300 px-2.5 py-1 text-[10px] font-bold text-dark-950">شروع از اینجا</span>
+                    )}
                   </div>
+                  <span className="block text-sm font-bold text-white sm:text-base">{category.name}</span>
+                  {tagline && <span className="mt-1 block text-[11px] leading-5 text-white/70">{tagline}</span>}
                 </div>
               </button>
             );
@@ -226,49 +265,67 @@ export default function Home({ onNavigate, onQuickView, focusCatalog = false, ca
 
       {/* Chapter: trust & services */}
       <section id="chapter-trust" className="mx-auto max-w-7xl scroll-mt-20 px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
-          {[
-            { icon: Truck, title: 'ارسال رایگان', desc: 'برای سفارش‌های بالای ۵۰۰ هزار تومان' },
-            { icon: Shield, title: 'ضمانت اصالت', desc: 'تمام محصولات اصل و تضمین‌شده' },
-            { icon: RefreshCw, title: 'بازگشت کالا', desc: 'تا ۷ روز پس از تحویل' },
-            { icon: Sparkles, title: 'تخفیف اعضا', desc: 'تخفیف ویژه برای کاربران عضو' },
-          ].map((feature, index) => (
-            <div
-              key={feature.title}
-              className="card flex items-center gap-2.5 p-3 animate-fade-in-up hover:shadow-lg sm:gap-3 sm:p-4"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600 sm:h-12 sm:w-12">
-                <feature.icon className="h-6 w-6" />
+        <div className="rounded-[1.75rem] border border-dark-100 bg-white/70 px-5 py-8 sm:px-8 sm:py-9">
+          <div className="mb-7 flex items-center gap-3">
+            <span className="h-px w-8 bg-amber-600/50" />
+            <span className="text-[11px] font-bold uppercase tracking-[0.34em] text-amber-700">خدمات مُدارا</span>
+          </div>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-7 lg:grid-cols-4 lg:gap-0 lg:divide-x lg:divide-x-reverse lg:divide-dark-100">
+            {[
+              { icon: Truck, title: 'ارسال رایگان', desc: 'برای سفارش‌های بالای ۵۰۰ هزار تومان' },
+              { icon: Shield, title: 'ضمانت اصالت', desc: 'تمام محصولات اصل و تضمین‌شده' },
+              { icon: RefreshCw, title: 'بازگشت کالا', desc: 'تا ۷ روز پس از تحویل' },
+              { icon: Sparkles, title: 'تخفیف اعضا', desc: 'تخفیف ویژه برای کاربران عضو' },
+            ].map((feature, index) => (
+              <div
+                key={feature.title}
+                className="flex animate-fade-in-up items-start gap-3.5 lg:px-7 lg:first:pr-0 lg:last:pl-0"
+                style={{ animationDelay: `${index * 90}ms` }}
+              >
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-amber-50 text-amber-600 ring-1 ring-amber-100">
+                  <feature.icon className="h-5 w-5" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-dark-900">{feature.title}</p>
+                  <p className="mt-1 text-xs leading-5 text-dark-500">{feature.desc}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-xs font-semibold text-dark-900 sm:text-sm">{feature.title}</p>
-                <p className="text-[11px] leading-4 text-dark-500 sm:text-xs">{feature.desc}</p>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Chapter: journal */}
       <section id="chapter-journal" className="mx-auto max-w-7xl scroll-mt-20 px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
-        <div className="mb-6 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
+        <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr] lg:items-end lg:gap-14">
           <div>
-            <h2 className="mb-1 text-2xl font-bold text-dark-900 sm:text-3xl">آخرین مقالات</h2>
-            <p className="text-dark-500">راهنمای مد و استایل</p>
+            <div className="flex items-center gap-3">
+              <span className="h-px w-10 bg-amber-600/60" />
+              <span className="text-[11px] font-bold uppercase tracking-[0.34em] text-amber-700">ژورنال مُدارا</span>
+            </div>
+            <h2 className="mt-4 text-3xl font-black leading-[1.2] tracking-tight text-dark-900 text-balance sm:text-4xl">
+              راهنمای مد و
+              <span className="bg-gradient-to-l from-amber-600 via-amber-500 to-accent-500 bg-clip-text text-transparent">استایل</span>
+            </h2>
           </div>
-          <button
-            onClick={() => onNavigate('blog')}
-            className="group flex w-fit items-center gap-2 text-sm font-medium text-amber-600 hover:text-amber-700 sm:text-base"
-          >
-            مشاهده همه
-            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-          </button>
+          <div className="flex flex-col items-start gap-4 lg:items-end">
+            <p className="max-w-sm text-sm leading-7 text-dark-600 sm:text-[0.95rem] lg:text-left">
+              مقاله‌های کوتاه و کاربردی دربارهٔ انتخاب، ست کردن و نگه‌داری از قطعه‌هایی که می‌خرید.
+            </p>
+            <button
+              onClick={() => onNavigate('blog')}
+              className="group inline-flex items-center gap-2 rounded-full bg-dark-900 px-5 py-2.5 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-dark-800 active:scale-95"
+            >
+              مشاهدهٔ همهٔ مقالات
+              <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+            </button>
+          </div>
         </div>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+
+        <div className="mt-8 grid grid-cols-1 gap-5 sm:mt-10 md:grid-cols-3">
           {loading
             ? [1, 2, 3].map((item) => (
-                <div key={item} className="rounded-2xl border border-dark-100 bg-white p-4">
+                <div key={item} className="rounded-[1.4rem] border border-dark-100 bg-white p-4">
                   <div className="mb-4 aspect-video rounded-xl shimmer-bg" />
                   <div className="h-4 w-3/4 rounded shimmer-bg" />
                 </div>
@@ -277,27 +334,32 @@ export default function Home({ onNavigate, onQuickView, focusCatalog = false, ca
                 <button
                   key={post.id}
                   onClick={() => onNavigate('blog-post', post.slug)}
-                  className="group overflow-hidden rounded-2xl border border-dark-100 bg-white text-right transition-all hover:-translate-y-1 hover:shadow-xl animate-fade-in-up"
+                  className="group animate-fade-in-up overflow-hidden rounded-[1.4rem] border border-dark-100 bg-white text-right transition-all duration-500 hover:-translate-y-1.5 hover:border-amber-200 hover:shadow-2xl hover:shadow-amber-500/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <div className="aspect-video overflow-hidden bg-dark-50">
+                  <div className="relative aspect-video overflow-hidden bg-dark-50">
                     <ResponsiveImage
                       src={post.image_url}
                       alt={post.title}
                       sizes="(max-width: 768px) 100vw, 380px"
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      className="h-full w-full object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.07]"
                     />
+                    <div className="absolute inset-0 bg-gradient-to-t from-dark-950/25 to-transparent" />
                   </div>
                   <div className="p-5">
-                    <div className="mb-2 flex items-center gap-2 text-xs text-dark-400">
-                      <span>{formatDate(post.created_at)}</span>
+                    <div className="mb-2.5 flex items-center gap-2 text-[11px] text-dark-400">
+                      <span className="rounded-full bg-dark-50 px-2.5 py-1 font-semibold text-dark-600">{formatDate(post.created_at)}</span>
                       <span>•</span>
                       <span>{post.author}</span>
                     </div>
-                    <h3 className="mb-2 line-clamp-2 font-bold text-dark-900 transition-colors group-hover:text-amber-700">
+                    <h3 className="mb-2 line-clamp-2 text-base font-bold leading-6 text-dark-900 transition-colors group-hover:text-amber-700">
                       {post.title}
                     </h3>
-                    <p className="line-clamp-2 text-sm text-dark-500">{post.excerpt}</p>
+                    <p className="line-clamp-2 text-sm leading-6 text-dark-500">{post.excerpt}</p>
+                    <span className="mt-3.5 inline-flex items-center gap-1.5 text-xs font-bold text-amber-700">
+                      ادامهٔ مقاله
+                      <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-1" />
+                    </span>
                   </div>
                 </button>
               ))}
