@@ -136,6 +136,21 @@ if (addButton) {
   check('guest cart persists to localStorage', Boolean(stored), stored ? `${JSON.parse(stored).length} line(s)` : 'empty');
 }
 
+/* --------------------------------------------------------- member coupon */
+await mount('', 'کد تخفیف اعضا');
+const couponChip = [...window.document.querySelectorAll('button')].find((button) =>
+  button.textContent?.includes('WELCOME10'),
+);
+check('the member coupon chip is on the page', Boolean(couponChip));
+
+if (couponChip) {
+  await act(async () => {
+    couponChip.click();
+  });
+  // jsdom has no clipboard API, so writeText rejects and the chip still confirms.
+  check('the coupon chip confirms the copy', (window.document.body.textContent || '').includes('کپی شد'));
+}
+
 /* ----------------------------------------------------------- quick view */
 // «بستن نمایش سریع» only exists inside the overlay, unlike the cards' pill text.
 check('quick view opens from a deep link', await mount('#product/classic-white-shirt', 'بستن نمایش سریع'));

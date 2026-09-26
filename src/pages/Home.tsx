@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowLeft, Gem, Glasses, Package, RefreshCw, Shield, Shirt, ShoppingBag, Sparkles, Star, Truck, Watch } from 'lucide-react';
+import { ArrowLeft, Check, Copy, Gem, Glasses, Package, RefreshCw, Shield, Shirt, ShoppingBag, Sparkles, Truck, Watch } from 'lucide-react';
 import { supabase, type Product, type BlogPost, type Category } from '../lib/supabase';
 import { seedCategories, seedProducts } from '../lib/demoSeed';
 import { formatDate } from '../lib/format';
@@ -58,7 +58,19 @@ export default function Home({ onNavigate, onQuickView, focusCatalog = false, ca
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string | null>(catalogCategory);
+  const [couponCopied, setCouponCopied] = useState(false);
   const catalogRef = useRef<HTMLDivElement | null>(null);
+
+  // WELCOME10 is the live coupon in the store, so the promo can copy it for real.
+  const copyCoupon = async () => {
+    try {
+      await navigator.clipboard.writeText('WELCOME10');
+    } catch {
+      // Clipboard access can be denied; the code stays readable on the chip.
+    }
+    setCouponCopied(true);
+    window.setTimeout(() => setCouponCopied(false), 2200);
+  };
   const focusHandledRef = useRef(false);
 
   // The story chapter shows live top-rated products once loaded, seed fallback before.
@@ -366,41 +378,49 @@ export default function Home({ onNavigate, onQuickView, focusCatalog = false, ca
         </div>
       </section>
 
-      {/* Inline promo */}
+      {/* Chapter: the member coupon. The code below is the live coupon in the
+          store, so the promise on this panel is one the checkout keeps. */}
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-16 lg:px-8">
         <div className="relative overflow-hidden rounded-[2rem] bg-[#241914] p-6 text-white sm:p-8 md:p-12" dir="rtl">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(245,158,11,0.24),transparent_30%),linear-gradient(115deg,#1b1412_0%,#472416_56%,#a34a10_100%)]" />
-          <div className="relative z-10 grid items-center gap-10 md:grid-cols-[0.9fr_1.1fr] md:gap-14">
+          <div className="relative z-10 grid items-center gap-10 md:grid-cols-[1.05fr_0.95fr] md:gap-14">
             <div className="order-2 text-center md:order-1 md:text-right">
-              <div className="mx-auto mb-5 flex max-w-sm items-center justify-center gap-3 md:mx-0 md:justify-start">
-                <span className="h-px w-12 bg-amber-300/60" />
-                <span className="text-[10px] font-bold uppercase tracking-[0.32em] text-amber-200/80">MODARA PRIVATE EDIT</span>
+              <div className="mx-auto mb-4 flex max-w-sm items-center justify-center gap-3 md:mx-0 md:justify-start">
+                <span className="h-px w-10 bg-amber-300/60" />
+                <span className="text-[11px] font-bold uppercase tracking-[0.34em] text-amber-200/80">
+                  کد تخفیف اعضا
+                </span>
               </div>
               <div className="relative mx-auto max-w-[18rem] md:mx-0">
-                <span className="block text-8xl font-black leading-none tracking-[-0.08em] text-amber-300/90 sm:text-9xl">۴۰٪</span>
-                <span className="mt-1 block text-sm font-bold tracking-[0.2em] text-white/60">SELECTED COLLECTION</span>
+                <span className="block text-8xl font-black leading-none tracking-[-0.06em] text-amber-300/90 sm:text-9xl">
+                  ۱۰٪
+                </span>
+                <span className="mt-2 block text-sm font-bold tracking-[0.2em] text-white/60">
+                  اولین سفارش شما
+                </span>
               </div>
-              <div className="mt-7 flex flex-wrap justify-center gap-2 md:justify-start">
-                {['لباس‌های منتخب', 'اکسسوری‌های خاص'].map((tag) => (
-                  <span key={tag} className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs text-white/75">
-                    {tag}
-                  </span>
-                ))}
-              </div>
+              <button
+                type="button"
+                onClick={copyCoupon}
+                aria-label={couponCopied ? 'کد تخفیف کپی شد' : 'کپی کد تخفیف WELCOME10'}
+                className="group mx-auto mt-6 flex items-center gap-3 rounded-full border border-dashed border-amber-300/50 bg-black/25 px-5 py-3 transition-all hover:border-amber-300 hover:bg-black/40 active:scale-95 md:mx-0"
+              >
+                <span className="text-lg font-black tracking-[0.18em] text-amber-200">WELCOME10</span>
+                <span className="flex items-center gap-1.5 border-r border-white/15 pr-3 text-xs font-bold text-white/70">
+                  {couponCopied ? <Check className="h-4 w-4 text-emerald-300" /> : <Copy className="h-4 w-4" />}
+                  {couponCopied ? 'کپی شد' : 'کپی کد'}
+                </span>
+              </button>
             </div>
 
             <div className="order-1 text-center md:order-2 md:text-right">
-              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-amber-200/25 bg-amber-100/10 px-4 py-2 text-xs font-semibold text-amber-100">
-                <Star className="h-4 w-4 text-amber-300" />
-                انتخاب‌های ماندگار مُدارا
-              </div>
               <h3 className="max-w-2xl text-3xl font-black leading-[1.25] text-white text-balance sm:text-4xl md:text-5xl">
                 استایل بهتر،
                 <span className="block text-amber-300">انتخاب هوشمندانه‌تر</span>
               </h3>
               <p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-white/70 sm:text-base md:mx-0">
-                قطعه‌های منتخب این فصل را با قیمت ویژه کشف کنید؛ از لباس‌های روزمره تا اکسسوری‌هایی که امضای
-                شخصی شما را کامل می‌کنند.
+                کد <span className="font-bold text-amber-200">WELCOME10</span> را در صفحهٔ پرداخت وارد کنید تا ۱۰٪ از
+                اولین سفارش شما کم شود — بدون حداقل مبلغ خرید و بدون تاریخ انقضا.
               </p>
               <div className="mt-7 flex flex-col items-center gap-4 sm:flex-row sm:justify-center md:justify-start">
                 <button
@@ -408,15 +428,11 @@ export default function Home({ onNavigate, onQuickView, focusCatalog = false, ca
                     setActiveCategory(null);
                     catalogRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                   }}
-                  className="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-amber-300 px-6 py-3.5 font-bold text-dark-950 transition-all hover:-translate-y-0.5 hover:bg-amber-200 active:scale-95 sm:w-auto"
+                  className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-amber-300 px-6 py-3 text-sm font-bold text-dark-950 transition-all hover:-translate-y-0.5 hover:bg-amber-200 hover:shadow-lg active:scale-95 sm:w-auto"
                 >
-                  مشاهده کالکشن ویژه
-                  <ArrowLeft className="h-5 w-5 transition-transform group-hover:-translate-x-1" />
+                  مشاهدهٔ کالکشن
+                  <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
                 </button>
-                <span className="inline-flex items-center gap-2 text-xs text-white/55">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
-                  ارسال رایگان برای سفارش‌های بالای ۵۰۰ هزار تومان
-                </span>
               </div>
             </div>
           </div>
